@@ -1,5 +1,5 @@
-const nonTidy = require("./non-tidy.json");
-const tidy = require("./tidy.json");
+const nonTidy = require("../test_data/non-tidy.json");
+const tidy = require("../test_data/tidy.json");
 const Series = require("../series-shaper");
 
 const transform = {
