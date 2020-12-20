@@ -1,4 +1,5 @@
 const nonTidy = require("./test_data/non-tidy.json");
+const tidy = require("./test_data/tidy.json");
 
 class Series {
   constructor(df, dataType = undefined, chartType = undefined) {
@@ -22,6 +23,10 @@ class Series {
 
   set chartType(chartType) {
     this._chartType = chartType;
+  }
+
+  get series() {
+    return this._series;
   }
 
   filter(filterObj) {
@@ -48,6 +53,19 @@ class Series {
     return this._df;
   }
 
+  #getUnique = (filterColumns) => {
+    var lookup = {};
+    var result = [];
+    for (var item, i = 0; (item = this._df[i++]); ) {
+      var name = item[filterColumns];
+      if (!(name in lookup)) {
+        lookup[name] = 1;
+        result.push(name);
+      }
+    }
+    return result;
+  };
+
   #yValues(decimals) {
     if (decimals !== undefined) {
       return (r, c) => (r[c] !== null ? +r[c].toFixed(decimals) : r[c]);
@@ -58,15 +76,15 @@ class Series {
 
   #seriesProperties(colors) {
     if (colors !== undefined) {
-      return (key, data, seriesName, customColors) => ({
-        name: key,
-        data: data,
+      return (seriesName, seriesData, customColors) => ({
+        name: seriesName,
+        data: seriesData,
         color: customColors[seriesName],
       });
     } else {
-      return (key, data, seriesName, customColors) => ({
-        name: key,
-        data: data,
+      return (seriesName, seriesData, customColors) => ({
+        name: seriesName,
+        data: seriesData,
       });
     }
   }
@@ -105,11 +123,29 @@ class Series {
     const seriesOperator = this.#seriesProperties(colors);
     for (const [key, value] of Object.entries(seriesData)) {
       if (colTotals[key] !== 0) {
-        seriesResult.push(seriesOperator(key, value, key, colors));
+        seriesResult.push(seriesOperator(key, value, colors));
       }
     }
-
     return seriesResult;
+  }
+
+  #tidyOperation(xCol, yCols, colors, decimals, valuesCol, xName) {
+    const variableColumn = this.#getUnique(yCols);
+    const yOperator = this.#yValues(decimals);
+    const seriesOperator = this.#seriesProperties(colors);
+    xName = this.#properxName(xName);
+    const seriesData = variableColumn.map((v) => {
+      const variableSeries = this._df.filter((row) => row[yCols] == v);
+      const hcData = variableSeries.map((r) => {
+        return {
+          [xName]: r[xCol],
+          y: yOperator(r, valuesCol),
+        };
+      });
+      return seriesOperator(v, hcData, colors);
+    });
+
+    return seriesData;
   }
 
   generateSeries(
@@ -117,6 +153,7 @@ class Series {
     yCols,
     colors = undefined,
     decimals = undefined,
+    valuesCol = undefined, //only for tidy data with one numeric/values column.
     xName = undefined
   ) {
     if (this._dataType == "non-tidy") {
@@ -127,26 +164,52 @@ class Series {
         decimals,
         xName
       );
+    } else {
+      this._series = this.#tidyOperation(
+        xCol,
+        yCols,
+        colors,
+        decimals,
+        valuesCol,
+        xName
+      );
     }
     return this._series;
   }
 }
 
+// const colors = {
+//   Marine: "Red",
+//   Pipeline: "Blue",
+//   Railway: "Green",
+//   Truck: "Yellow",
+// };
+// const series = new Series(nonTidy, "non-tidy", "line");
+// let data = series.filter({ Product: "Propane", Origin: "Canada" });
+// data = series.sort("Period", "descending");
+// let hcSeries = series.generateSeries(
+//   "Period",
+//   ["Marine", "Pipeline", "Railway", "Truck"],
+//   colors,
+//   1
+// );
+// console.log(hcSeries[0]);
+
 const colors = {
-  Marine: "Red",
-  Pipeline: "Blue",
-  Railway: "Green",
-  Truck: "Yellow",
+  "PADD I": "Red",
+  "PADD II": "Blue",
+  "PADD III": "Orange",
+  "PADD IV": "Green",
+  "PADD V": "Yellow",
+  Other: "Grey",
 };
-
-const series = new Series(nonTidy, "non-tidy", "line");
-let data = series.filter({ Product: "Propane", Origin: "Canada" });
-data = series.sort("Period", "descending");
+const series = new Series(tidy, "tidy", "line");
+series.sort("Year", "descending");
 let hcSeries = series.generateSeries(
-  "Period",
-  ["Marine", "Pipeline", "Railway", "Truck"],
+  "Year",
+  "PADD",
   colors,
-  1
+  undefined,
+  "Value"
 );
-
 console.log(hcSeries[0]);
