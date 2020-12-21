@@ -4,15 +4,17 @@ class Series {
     chartType = undefined,
     xCol = undefined,
     yCols = undefined,
+    filters = undefined,
     transform = undefined,
     valuesCol = undefined,
     colors = undefined,
-    xName = undefined,
+    xName = "x",
   }) {
     this._df = df;
     this._chartType = chartType;
     this._xCol = xCol;
     this._yCols = yCols;
+    this._filters;
     this._transform = transform;
     this._valuesCol = valuesCol;
     this._colors = colors;
@@ -45,7 +47,7 @@ class Series {
   }
 
   get xCol() {
-    return this._colors;
+    return this._xCol;
   }
 
   set xCol(newxCol) {
@@ -57,7 +59,15 @@ class Series {
   }
 
   set yCols(newyCols) {
-    this._xCol = newyCols;
+    this._yCols = newyCols;
+  }
+
+  get filters() {
+    return this._filters;
+  }
+
+  set filters(newFilters) {
+    this._filters = newFilters;
   }
 
   get transform() {
@@ -81,7 +91,7 @@ class Series {
   }
 
   set xName(newxName) {
-    this._xCol = newxName;
+    this._xName = newxName;
   }
 
   /**
@@ -149,9 +159,10 @@ class Series {
       return xName;
     }
     if (this._chartType == undefined) {
+      this.xName = "x";
       return "x";
     } else if (["line", "area"].includes(this._chartType)) {
-      return "x";
+      this.xName = "x";
     } //TODO: add more chart types here
   }
 
@@ -213,12 +224,12 @@ class Series {
       seriesData[col] = [];
       colTotals[col] = 0;
     });
-    xName = this.#properxName(xName);
+    this.#properxName(xName);
     const yOperator = this.#yValues(transform);
     this._df.map((row) => {
       yCols.map((col) => {
         seriesData[col].push({
-          [xName]: row[xCol],
+          [this._xName]: row[xCol],
           y: yOperator(row, col),
         });
         colTotals[col] = colTotals[col] + row[col];
@@ -239,12 +250,12 @@ class Series {
     const variableColumn = this.#getUnique(yCols);
     const yOperator = this.#yValues(transform);
     const seriesOperator = this.#seriesProperties(colors);
-    xName = this.#properxName(xName);
+    this.#properxName(xName);
     const seriesData = variableColumn.map((v) => {
       const variableSeries = this._df.filter((row) => row[yCols] == v);
       const hcData = variableSeries.map((r) => {
         return {
-          [xName]: r[xCol],
+          [this._xName]: r[xCol],
           y: yOperator(r, valuesCol),
         };
       });
@@ -261,46 +272,25 @@ class Series {
       this._dataType = "tidy";
     }
   }
-  /**
-   *
-   * @param {*} xCol The data column intended for the chart xAxis. Typically a date or category.
-   * @param {*} yCols Non-tidy data: The column name(s) that will be shaped into serie(s) names and chart y-values. Tidy data: The column name that contains discrete categories that will be shaped into series names and chart y-values.
-   * @param {*} transform Object defining the transformation parameters for the series y-values. Parameters include: decimals, conversion, operator
-   * @param {*} valuesCol Required for tidy data. The column name that contains numeric data. Typically called "values, value, prices, etc"
-   * @param {*} colors Optional object specifying custom colors for each series name specified in "yCols"
-   * @param {*} xName Optional. A custom key/name for the series "x" values/categories. Defaults to "x" for most chart types.
-   */
-  generateSeries({
-    xCol = this._xCol,
-    yCols = this._yCols,
-    transform = this._transform,
-    valuesCol = this._transform, //only for tidy data with one numeric/values column.
-    colors = this._colors,
-    xName = this._xName,
-  }) {
-    this.#findDataType(yCols, valuesCol);
-    this.xCol = xCol;
-    this.yCols = yCols;
-    this.transform = transform;
-    this.valuesCol = valuesCol;
-    this.colors = colors;
-    this.xName = xName;
+
+  generateSeries() {
+    this.#findDataType(this._yCols, this._valuesCol);
     if (this._dataType == "non-tidy") {
       this._series = this.#nonTidyOperation(
-        xCol,
-        yCols,
-        transform,
-        colors,
-        xName
+        this._xCol,
+        this._yCols,
+        this._transform,
+        this._colors,
+        this._xName
       );
     } else {
       this._series = this.#tidyOperation(
-        xCol,
-        yCols,
-        transform,
-        colors,
-        valuesCol,
-        xName
+        this._xCol,
+        this._yCols,
+        this._transform,
+        this._colors,
+        this._valuesCol,
+        this._xName
       );
     }
     return this._series;

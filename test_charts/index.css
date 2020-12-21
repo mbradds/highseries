@@ -1,0 +1,11 @@
+@media only screen and (max-height: 650px) {
+  .hChart {
+    height: 300px;
+  }
+}
+
+@media only screen and (min-height: 650px) {
+  .hChart {
+    height: 400px;
+  }
+}
