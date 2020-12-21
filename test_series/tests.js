@@ -37,13 +37,13 @@ const colors = {
   Other: "Grey",
 };
 
-const series = new Series({ df: tidy, chartType: "line" });
-series.sort("Year", "desc");
-let hcSeries = series.generateSeries(
-  "Year",
-  "PADD",
-  transform,
-  "Value",
-  colors
-);
+const series = new Series({ df: tidy, chartType: "line", colors: colors });
+series.transform = transform;
+series.filter({'Year':2018})
+let hcSeries = series.generateSeries({
+  xCol: "Year",
+  yCols: "PADD",
+  valuesCol: "Value",
+  //transform: false,
+});
 console.log(hcSeries[0]);

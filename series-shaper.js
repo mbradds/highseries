@@ -1,9 +1,23 @@
 class Series {
-  constructor({ df, chartType = undefined, colors = undefined }) {
+  constructor({
+    df,
+    chartType = undefined,
+    xCol = undefined,
+    yCols = undefined,
+    transform = undefined,
+    valuesCol = undefined,
+    colors = undefined,
+    xName = undefined,
+  }) {
     this._df = df;
     this._chartType = chartType;
-    this._series = undefined;
+    this._xCol = xCol;
+    this._yCols = yCols;
+    this._transform = transform;
+    this._valuesCol = valuesCol;
     this._colors = colors;
+    this._xName = xName;
+    this._series = undefined;
   }
 
   get df() {
@@ -22,9 +36,54 @@ class Series {
     this._chartType = chartType;
   }
 
-  get series() {
-    return this._series;
+  get colors() {
+    return this._colors;
   }
+
+  set colors(newColors) {
+    this._colors = newColors;
+  }
+
+  get xCol() {
+    return this._colors;
+  }
+
+  set xCol(newxCol) {
+    this._xCol = newxCol;
+  }
+
+  get yCols() {
+    return this._yCols;
+  }
+
+  set yCols(newyCols) {
+    this._xCol = newyCols;
+  }
+
+  get transform() {
+    return this._transform;
+  }
+
+  set transform(newtransform) {
+    this._transform = newtransform;
+  }
+
+  get valuesCol() {
+    return this._valuesCol;
+  }
+
+  set valuesCol(newvaluesCol) {
+    this._valuesCol = newvaluesCol;
+  }
+
+  get xName() {
+    return this._xName;
+  }
+
+  set xName(newxName) {
+    this._xCol = newxName;
+  }
+
   /**
    * For best performance, data should be pre-filtered where possible. filter should only be called prior to generating a new series with "generateSeries"
    * @param {*} filterObj Object specifying key(s) (column name) and values (column value). A subset of the original data will be returned where the column name equals the value.
@@ -97,18 +156,16 @@ class Series {
   }
 
   #yValues(transform) {
-    if (
+    if (!transform) {
+      return (r, c) => r[c];
+    } else if (
+      transform &&
       transform.hasOwnProperty("decimals") &&
       !transform.hasOwnProperty("operator")
     ) {
       return (r, c) =>
         r[c] !== null ? +r[c].toFixed(transform.decimals) : r[c];
-    } else if (
-      !transform.hasOwnProperty("decimals") &&
-      !transform.hasOwnProperty("operator")
-    ) {
-      return (r, c) => r[c];
-    } else if (transform.hasOwnProperty("operator")) {
+    } else if (transform && transform.hasOwnProperty("operator")) {
       if (transform.hasOwnProperty("decimals")) {
         if (transform.operator == "*") {
           return (r, c) =>
@@ -213,15 +270,21 @@ class Series {
    * @param {*} colors Optional object specifying custom colors for each series name specified in "yCols"
    * @param {*} xName Optional. A custom key/name for the series "x" values/categories. Defaults to "x" for most chart types.
    */
-  generateSeries(
-    xCol,
-    yCols,
-    transform = false,
-    valuesCol = undefined, //only for tidy data with one numeric/values column.
-    colors = undefined,
-    xName = undefined
-  ) {
+  generateSeries({
+    xCol = this._xCol,
+    yCols = this._yCols,
+    transform = this._transform,
+    valuesCol = this._transform, //only for tidy data with one numeric/values column.
+    colors = this._colors,
+    xName = this._xName,
+  }) {
     this.#findDataType(yCols, valuesCol);
+    this.xCol = xCol;
+    this.yCols = yCols;
+    this.transform = transform;
+    this.valuesCol = valuesCol;
+    this.colors = colors;
+    this.xName = xName;
     if (this._dataType == "non-tidy") {
       this._series = this.#nonTidyOperation(
         xCol,
@@ -244,14 +307,3 @@ class Series {
   }
 }
 module.exports = Series;
-
-// class Series {
-//   constructor() {
-//     this.publicField = this.#privateMethod();
-//   }
-
-//   #privateMethod() {
-//     return 42;
-//   }
-// }
-// module.exports = Series;
