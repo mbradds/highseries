@@ -1,12 +1,25 @@
 {
   "name": "highseries",
-  "description": "A tool for converting style/structure agnostic spreadsheet style data into Highcharts consumable data on the fly.",
-  "authors": "author",
   "version": "1.0.0",
-  "main": "./series-shaper.js",
+  "description": "A tool for converting structure agnostic spreadsheet style data into Highcharts consumable data on the fly.",
+  "main": "series-shaper.js",
+  "directories": {
+    "example": "examples"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mbradds/highseries.git"
   },
-  "dependencies": {}
+  "keywords": [
+    "Highcharts"
+  ],
+  "author": "Grant Moss",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mbradds/highseries/issues"
+  },
+  "homepage": "https://github.com/mbradds/series-shaper#readme"
 }

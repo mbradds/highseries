@@ -1,4 +1,4 @@
-class Series {
+module.exports = class Series {
   constructor({
     df,
     chartType = undefined,
@@ -328,5 +328,4 @@ class Series {
     }
     return this._series;
   }
-}
-module.exports = Series;
+};
