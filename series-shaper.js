@@ -14,7 +14,7 @@ class Series {
     this._chartType = chartType;
     this._xCol = xCol;
     this._yCols = yCols;
-    this._filters;
+    this._filters = filters;
     this._transform = transform;
     this._valuesCol = valuesCol;
     this._colors = colors;
@@ -94,42 +94,80 @@ class Series {
     this._xName = newxName;
   }
 
+  get dataType() {
+    return this._dataType;
+  }
+
+  set dataType(newDataType) {
+    this._dataType = newDataType;
+  }
+
+  update({
+    df = this._df,
+    chartType = this._chartType,
+    xCol = this._xCol,
+    yCols = this._yCols,
+    filters = this._filters,
+    transform = this._transform,
+    valuesCol = this._valuesCol,
+    colors = this._colors,
+    xName = this._xName,
+  }) {
+    this.df = df;
+    this.chartType = chartType;
+    this.xCol = xCol;
+    this.yCols = yCols;
+    this.filters = filters;
+    this.transform = transform;
+    this.valuesCol = valuesCol;
+    this.colors = colors;
+    this.xName = xName;
+  }
+
   /**
-   * For best performance, data should be pre-filtered where possible. filter should only be called prior to generating a new series with "generateSeries"
+   * For best performance, data should be pre-filtered where possible. filter should only be called prior to generating a new series with "generate"
    * @param {*} filterObj Object specifying key(s) (column name) and values (column value). A subset of the original data will be returned where the column name equals the value.
    */
   filter(filterObj) {
     for (const [key, value] of Object.entries(filterObj)) {
       if (!Array.isArray(value)) {
-        this._df = this._df.filter((row) => row[key] == value);
+        this.df = this.df.filter((row) => row[key] == value);
       } else {
         value.map((filterValue) => {
-          this._df = this._df.filter((row) => row[key] == filterValue);
+          this.df = this.df.filter((row) => row[key] == filterValue);
         });
       }
     }
-    return this._df;
+    return this.df;
   }
   /**
-   * For best performance, data should be pre-sorted. Sort should only be called prior to generating a new series with "generateSeries"
+   * For best performance, data should be pre-sorted. Sort should only be called prior to generating a new series with "generate"
    * @param {*} by The column name to sort on. This column will typically be the data "index", such as a date.
    * @param {*} how Enter either "asc" (ascending order) or "desc" (descending order). Default is "asc"
    */
   sort(by, how = "asc") {
     let sortedData = [];
     if (how == "asc") {
-      sortedData = this._df.slice().sort((a, b) => b[by] - a[by]);
+      sortedData = this.df.slice().sort((a, b) => b[by] - a[by]);
     } else if (how == "desc") {
-      sortedData = this._df.slice().sort((a, b) => a[by] - b[by]);
+      sortedData = this.df.slice().sort((a, b) => a[by] - b[by]);
     }
-    this._df = sortedData;
-    return this._df;
+    this.df = sortedData;
+    return this.df;
+  }
+
+  #findDataType(y, valuesCol) {
+    if (Array.isArray(y) && valuesCol == undefined) {
+      this._dataType = "non-tidy";
+    } else {
+      this._dataType = "tidy";
+    }
   }
 
   #getUnique(filterColumns) {
     var lookup = {};
     var result = [];
-    for (var item, i = 0; (item = this._df[i++]); ) {
+    for (var item, i = 0; (item = this.df[i++]); ) {
       var name = item[filterColumns];
       if (!(name in lookup)) {
         lookup[name] = 1;
@@ -226,10 +264,10 @@ class Series {
     });
     this.#properxName(xName);
     const yOperator = this.#yValues(transform);
-    this._df.map((row) => {
+    this.df.map((row) => {
       yCols.map((col) => {
         seriesData[col].push({
-          [this._xName]: row[xCol],
+          [this.xName]: row[xCol],
           y: yOperator(row, col),
         });
         colTotals[col] = colTotals[col] + row[col];
@@ -252,10 +290,10 @@ class Series {
     const seriesOperator = this.#seriesProperties(colors);
     this.#properxName(xName);
     const seriesData = variableColumn.map((v) => {
-      const variableSeries = this._df.filter((row) => row[yCols] == v);
+      const variableSeries = this.df.filter((row) => row[yCols] == v);
       const hcData = variableSeries.map((r) => {
         return {
-          [this._xName]: r[xCol],
+          [this.xName]: r[xCol],
           y: yOperator(r, valuesCol),
         };
       });
@@ -265,32 +303,27 @@ class Series {
     return seriesData;
   }
 
-  #findDataType(y, valuesCol) {
-    if (Array.isArray(y) && valuesCol == undefined) {
-      this._dataType = "non-tidy";
-    } else {
-      this._dataType = "tidy";
+  generate() {
+    this.#findDataType(this._yCols, this.valuesCol);
+    if (this.filters) {
+      this.filter(this.filters);
     }
-  }
-
-  generateSeries() {
-    this.#findDataType(this._yCols, this._valuesCol);
-    if (this._dataType == "non-tidy") {
+    if (this.dataType == "non-tidy") {
       this._series = this.#nonTidyOperation(
-        this._xCol,
-        this._yCols,
-        this._transform,
-        this._colors,
-        this._xName
+        this.xCol,
+        this.yCols,
+        this.transform,
+        this.colors,
+        this.xName
       );
     } else {
       this._series = this.#tidyOperation(
-        this._xCol,
-        this._yCols,
-        this._transform,
-        this._colors,
-        this._valuesCol,
-        this._xName
+        this.xCol,
+        this.yCols,
+        this.transform,
+        this.colors,
+        this.valuesCol,
+        this.xName
       );
     }
     return this._series;

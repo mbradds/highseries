@@ -4,10 +4,10 @@ module.exports = {
   mode: "production",
   //   target: "es5",
   entry: {
-    testCharts: "./test_charts/index.js",
+    testCharts: "./index.js",
   },
   output: {
-    path: path.resolve(__dirname, "./dist"),
+    path: path.resolve(__dirname, "dist"),
     filename: "bundle_[name].js",
   },
   module: {

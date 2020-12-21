@@ -5,8 +5,8 @@ const getData = (Url) => {
   Httpreq.send(null);
   return JSON.parse(Httpreq.responseText);
 };
-const nonTidy = getData("../test_data/non-tidy.json");
-const tidy = getData("../test_data/tidy.json");
+const nonTidy = getData("./test_data/non-tidy.json");
+const tidy = getData("./test_data/tidy.json");
 
 const loadChart = (series, div) => {
   return new Highcharts.chart(div, {
@@ -46,8 +46,8 @@ const createTidyChart = (data, filters) => {
   series.xCol = "Period";
   series.yCols = "Mode of Transportation";
   series.valuesCol = "Volume (Mb/d)";
-  series.filter(filters);
-  let hcSeries = series.generateSeries();
+  series.filters = filters;
+  let hcSeries = series.generate();
 
   let tidyChart = loadChart(hcSeries, "container-tidy");
   let t1 = performance.now();
@@ -64,8 +64,8 @@ const createNonTidyChart = (data, filters) => {
   const series = new Series({ df: data, chartType: "line", colors: colors });
   series.xCol = "Period";
   series.yCols = ["Marine", "Pipeline", "Railway", "Truck"];
-  series.filter(filters);
-  let hcSeries = series.generateSeries();
+  series.filters = filters;
+  let hcSeries = series.generate();
   let nonTidyChart = loadChart(hcSeries, "container-nonTidy");
   let t1 = performance.now();
   nonTidyChart.update({
@@ -83,10 +83,9 @@ let selectProduct = document.getElementById("select-product");
 selectProduct.addEventListener("change", (selectProduct) => {
   filters.Product = selectProduct.target.value;
   let t0TidyProduct = performance.now();
-  seriesTidy.df = tidy;
-  seriesTidy.filter(filters);
+  seriesTidy.update({ df: tidy, filters: filters });
   chartTidy.update({
-    series: seriesTidy.generateSeries(),
+    series: seriesTidy.generate(),
     title: {
       text: `Tidy update time ${(performance.now() - t0TidyProduct).toFixed(
         1
@@ -95,10 +94,9 @@ selectProduct.addEventListener("change", (selectProduct) => {
   });
 
   let t0NonTidyProduct = performance.now();
-  seriesNonTidy.df = nonTidy;
-  seriesNonTidy.filter(filters);
+  seriesNonTidy.update({ df: nonTidy, filters: filters });
   chartNonTidy.update({
-    series: seriesNonTidy.generateSeries(),
+    series: seriesNonTidy.generate(),
     title: {
       text: `Non-tidy update time ${(
         performance.now() - t0NonTidyProduct
