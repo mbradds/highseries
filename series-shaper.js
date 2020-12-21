@@ -1,8 +1,9 @@
 class Series {
-  constructor(df, chartType = undefined) {
+  constructor({ df, chartType = undefined, colors = undefined }) {
     this._df = df;
     this._chartType = chartType;
     this._series = undefined;
+    this._colors = colors;
   }
 
   get df() {
@@ -56,7 +57,7 @@ class Series {
     return this._df;
   }
 
-  #getUnique = (filterColumns) => {
+  #getUnique(filterColumns) {
     var lookup = {};
     var result = [];
     for (var item, i = 0; (item = this._df[i++]); ) {
@@ -67,7 +68,7 @@ class Series {
       }
     }
     return result;
-  };
+  }
 
   #seriesProperties(colors) {
     if (colors !== undefined) {
@@ -243,3 +244,14 @@ class Series {
   }
 }
 module.exports = Series;
+
+// class Series {
+//   constructor() {
+//     this.publicField = this.#privateMethod();
+//   }
+
+//   #privateMethod() {
+//     return 42;
+//   }
+// }
+// module.exports = Series;

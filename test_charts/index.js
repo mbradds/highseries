@@ -8,7 +8,6 @@ const getData = (Url) => {
 };
 //const tidy = getData("../test_data/tidy.json");
 const nonTidy = getData("../test_data/non-tidy.json");
-console.log(nonTidy);
 
 const transform = {
   conversion: 6.2898,

@@ -37,7 +37,7 @@ const colors = {
   Other: "Grey",
 };
 
-const series = new Series(tidy, "line");
+const series = new Series({ df: tidy, chartType: "line" });
 series.sort("Year", "desc");
 let hcSeries = series.generateSeries(
   "Year",
