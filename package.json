@@ -1,0 +1,12 @@
+{
+  "name": "highseries",
+  "description": "A tool for converting style/structure agnostic spreadsheet style data into Highcharts consumable data on the fly.",
+  "authors": "author",
+  "version": "1.0.0",
+  "main": "./series-shaper.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mbradds/highseries.git"
+  },
+  "dependencies": {}
+}

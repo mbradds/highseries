@@ -12,7 +12,7 @@ def process_data():
     for delete in ['Value (CN$)','Value (US$)', 'Price (CN cents/L)', 'Price (US cents/gallon)','Year','Volume (m3)','Month']:
         del df[delete]
     df['Origin'] = df['Origin'].replace({'Total':'Canada','Qu�bec':'Quebec'})
-    df = df[~df['Origin'].isin(['Yukon'])]
+    df = df[~df['Origin'].isin(['Yukon','New Brunswick','Newfoundland and Labrador','Nova Scotia'])]
     df = df.rename(columns={'Destination / PADD':'Destination'})
     df['Days in Month'] = [monthrange(x.year,x.month)[-1] for x in df['Period']]
     df['Volume (Mb/d)'] = [(x/days)/1000 for x,days in zip(df['Volume (bbl)'],df['Days in Month'])]
@@ -38,3 +38,4 @@ def process_data():
     
 if __name__ == "__main__":
     nonTidy,tidy = process_data()
+    print(list(set(nonTidy['Origin'])))

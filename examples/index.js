@@ -18,6 +18,11 @@ const loadChart = (series, div) => {
     tooltip: {
       shared: true,
     },
+    yAxis: {
+      title: {
+        text: "Exports (Mb/d)",
+      },
+    },
     xAxis: {
       type: "datetime",
       crosshair: true,
@@ -26,19 +31,19 @@ const loadChart = (series, div) => {
   });
 };
 
-const transform = {
-  conversion: 6.2898,
+let transform = {
+  conversion: 159,
   operator: "*",
   decimals: 2,
 };
-const colors = {
+let colors = {
   Marine: "Red",
   Pipeline: "Blue",
   Railway: "Green",
   Truck: "Yellow",
 };
-
-const filters = { Product: "Propane", Origin: "Canada" };
+let filters = { Product: "Propane", Origin: "Canada" };
+let units = { baseUnits: "Mb/d", secondaryUnits: "m3/d" };
 
 const createTidyChart = (data, filters) => {
   let t0 = performance.now();
@@ -79,28 +84,73 @@ const createNonTidyChart = (data, filters) => {
 let [chartTidy, seriesTidy] = createTidyChart(tidy, filters);
 let [chartNonTidy, seriesNonTidy] = createNonTidyChart(nonTidy, filters);
 
-let selectProduct = document.getElementById("select-product");
-selectProduct.addEventListener("change", (selectProduct) => {
-  filters.Product = selectProduct.target.value;
+const updateCharts = (chart, series, filters, data) => {
   let t0TidyProduct = performance.now();
-  seriesTidy.update({ df: tidy, filters: filters });
-  chartTidy.update({
-    series: seriesTidy.generate(),
+  series.update({ df: data, filters: filters });
+  for (var i = 0; i < chart.series.length; i++) {
+    chart.series[i].setData([]);
+  }
+  chart.update({
+    series: series.generate(),
     title: {
       text: `Tidy update time ${(performance.now() - t0TidyProduct).toFixed(
         1
       )} milliseconds`,
     },
   });
+  return [chart, series];
+};
 
-  let t0NonTidyProduct = performance.now();
-  seriesNonTidy.update({ df: nonTidy, filters: filters });
+let selectProduct = document.getElementById("select-product");
+selectProduct.addEventListener("change", (selectProduct) => {
+  filters.Product = selectProduct.target.value;
+  [chartTidy, seriesTidy] = updateCharts(chartTidy, seriesTidy, filters, tidy);
+
+  [chartNonTidy, seriesNonTidy] = updateCharts(
+    chartNonTidy,
+    seriesNonTidy,
+    filters,
+    nonTidy
+  );
+});
+
+let selectRegion = document.getElementById("select-region");
+selectRegion.addEventListener("change", (selectRegion) => {
+  filters.Origin = selectRegion.target.value;
+  [chartTidy, seriesTidy] = updateCharts(chartTidy, seriesTidy, filters, tidy);
+
+  [chartNonTidy, seriesNonTidy] = updateCharts(
+    chartNonTidy,
+    seriesNonTidy,
+    filters,
+    nonTidy
+  );
+});
+
+let selectUnits = document.getElementById("select-units");
+selectUnits.addEventListener("change", (selectUnits) => {
+  let currentUnits = selectUnits.target.value;
+  if (currentUnits == units.baseUnits) {
+    seriesTidy.update({ df: tidy, transform: false });
+    seriesNonTidy.update({ df: nonTidy, transform: false });
+  } else {
+    seriesTidy.update({ df: tidy, transform: transform });
+    seriesNonTidy.update({ df: nonTidy, transform: transform });
+  }
+  chartTidy.update({
+    series: seriesTidy.generate(),
+    yAxis: {
+      title: {
+        text: `Exports ${currentUnits}`,
+      },
+    },
+  });
   chartNonTidy.update({
     series: seriesNonTidy.generate(),
-    title: {
-      text: `Non-tidy update time ${(
-        performance.now() - t0NonTidyProduct
-      ).toFixed(1)} milliseconds`,
+    yAxis: {
+      title: {
+        text: `Exports ${currentUnits}`,
+      },
     },
   });
 });

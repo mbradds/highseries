@@ -304,7 +304,7 @@ class Series {
   }
 
   generate() {
-    this.#findDataType(this._yCols, this.valuesCol);
+    this.#findDataType(this.yCols, this.valuesCol);
     if (this.filters) {
       this.filter(this.filters);
     }
