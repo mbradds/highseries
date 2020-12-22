@@ -1,4 +1,4 @@
-const Series = require("../series-shaper.js");
+const Series = require("../dist/index.js");
 const getData = (Url) => {
   var Httpreq = new XMLHttpRequest(); // a new request
   Httpreq.open("GET", Url, false);

@@ -2,12 +2,13 @@
   "name": "highseries",
   "version": "1.0.0",
   "description": "A tool for converting structure agnostic spreadsheet style data into Highcharts consumable data on the fly.",
-  "main": "series-shaper.js",
+  "main": "dist/index.js",
   "directories": {
     "example": "examples"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "babel src/series-shaper.js --out-file dist/index.js"
   },
   "repository": {
     "type": "git",
@@ -21,5 +22,11 @@
   "bugs": {
     "url": "https://github.com/mbradds/highseries/issues"
   },
-  "homepage": "https://github.com/mbradds/series-shaper#readme"
+  "homepage": "https://github.com/mbradds/highseries#readme",
+  "devDependencies": {
+    "@babel/cli": "^7.12.10",
+    "@babel/core": "^7.12.10",
+    "@babel/plugin-proposal-private-methods": "^7.12.1",
+    "@babel/preset-env": "^7.12.11"
+  }
 }

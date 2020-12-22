@@ -1,6 +1,6 @@
 const nonTidy = require("./test_data/non-tidy.json");
 const tidy = require("./test_data/tidy.json");
-const Series = require("../series-shaper");
+const Series = require("../dist/index.js");
 
 const transform = {
   conversion: 6.2898,
@@ -34,4 +34,4 @@ seriesNonTidy.xCol = "Period";
 seriesNonTidy.yCols = ["Marine", "Pipeline", "Railway", "Truck"];
 seriesNonTidy.filters = filters;
 let hcNonTidy = seriesNonTidy.generate();
-console.log(hcNonTidy[0])
+console.log(hcNonTidy[0]);
