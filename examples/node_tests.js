@@ -17,7 +17,7 @@ const colors = {
   Truck: "Yellow",
 };
 
-const seriesTidy = new Series({ df: tidy, chartType: "line", colors: colors });
+const seriesTidy = new Series({ data: tidy, chartType: "line", colors: colors });
 seriesTidy.xCol = "Period";
 seriesTidy.yCols = "Mode of Transportation";
 seriesTidy.valuesCol = "Volume (Mb/d)";
@@ -26,7 +26,7 @@ let hcTidy = seriesTidy.generate();
 //console.log(hcTidy[0]);
 
 const seriesNonTidy = new Series({
-  df: nonTidy,
+  data: nonTidy,
   chartType: "line",
   colors: colors,
 });

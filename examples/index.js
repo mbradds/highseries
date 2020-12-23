@@ -1,10 +1,11 @@
-const Series = require("../dist/index.js");
+import Series from "../dist/index.js";
 const getData = (Url) => {
   var Httpreq = new XMLHttpRequest(); // a new request
   Httpreq.open("GET", Url, false);
   Httpreq.send(null);
   return JSON.parse(Httpreq.responseText);
 };
+
 const nonTidy = getData("./test_data/non-tidy.json");
 const tidy = getData("./test_data/tidy.json");
 
@@ -47,7 +48,7 @@ let units = { baseUnits: "Mb/d", secondaryUnits: "m3/d" };
 
 const createTidyChart = (data, filters) => {
   let t0 = performance.now();
-  const series = new Series({ df: data, chartType: "line", colors: colors });
+  const series = new Series({ data: data, chartType: "line", colors: colors });
   series.xCol = "Period";
   series.yCols = "Mode of Transportation";
   series.valuesCol = "Volume (Mb/d)";
@@ -66,7 +67,7 @@ const createTidyChart = (data, filters) => {
 
 const createNonTidyChart = (data, filters) => {
   let t0 = performance.now();
-  const series = new Series({ df: data, chartType: "line", colors: colors });
+  const series = new Series({ data: data, chartType: "line", colors: colors });
   series.xCol = "Period";
   series.yCols = ["Marine", "Pipeline", "Railway", "Truck"];
   series.filters = filters;
@@ -86,7 +87,7 @@ let [chartNonTidy, seriesNonTidy] = createNonTidyChart(nonTidy, filters);
 
 const updateCharts = (chart, series, filters, data) => {
   let t0TidyProduct = performance.now();
-  series.update({ df: data, filters: filters });
+  series.update({ data: data, filters: filters });
   for (var i = 0; i < chart.series.length; i++) {
     chart.series[i].setData([]);
   }
@@ -131,11 +132,11 @@ let selectUnits = document.getElementById("select-units");
 selectUnits.addEventListener("change", (selectUnits) => {
   let currentUnits = selectUnits.target.value;
   if (currentUnits == units.baseUnits) {
-    seriesTidy.update({ df: tidy, transform: false });
-    seriesNonTidy.update({ df: nonTidy, transform: false });
+    seriesTidy.update({ data: tidy, transform: false });
+    seriesNonTidy.update({ data: nonTidy, transform: false });
   } else {
-    seriesTidy.update({ df: tidy, transform: transform });
-    seriesNonTidy.update({ df: nonTidy, transform: transform });
+    seriesTidy.update({ data: tidy, transform: transform });
+    seriesNonTidy.update({ data: nonTidy, transform: transform });
   }
   chartTidy.update({
     series: seriesTidy.generate(),

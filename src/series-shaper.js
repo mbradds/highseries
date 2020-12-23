@@ -1,6 +1,6 @@
-module.exports = class Series {
+class Series {
   constructor({
-    df,
+    data,
     chartType = undefined,
     xCol = undefined,
     yCols = undefined,
@@ -10,7 +10,7 @@ module.exports = class Series {
     colors = undefined,
     xName = "x",
   }) {
-    this._df = df;
+    this._data = data;
     this._chartType = chartType;
     this._xCol = xCol;
     this._yCols = yCols;
@@ -22,12 +22,12 @@ module.exports = class Series {
     this._series = undefined;
   }
 
-  get df() {
-    return this._df;
+  get data() {
+    return this._data;
   }
 
-  set df(newData) {
-    this._df = newData;
+  set data(newData) {
+    this._data = newData;
   }
 
   get chartType() {
@@ -101,27 +101,30 @@ module.exports = class Series {
   set dataType(newDataType) {
     this._dataType = newDataType;
   }
-
-  update({
-    df = this._df,
-    chartType = this._chartType,
-    xCol = this._xCol,
-    yCols = this._yCols,
-    filters = this._filters,
-    transform = this._transform,
-    valuesCol = this._valuesCol,
-    colors = this._colors,
-    xName = this._xName,
-  }) {
-    this.df = df;
-    this.chartType = chartType;
-    this.xCol = xCol;
-    this.yCols = yCols;
-    this.filters = filters;
-    this.transform = transform;
-    this.valuesCol = valuesCol;
-    this.colors = colors;
-    this.xName = xName;
+  /**
+   *
+   * @param {*} newParams Object specifying new parameters for your Series class. Typical pattern involves calling update and then generate.
+   */
+  update(newParams) {
+    if (newParams.data) {
+      this.data = newParams.data;
+    } else if (newParams.chartType) {
+      this.chartType = newParams.chartType;
+    } else if (newParams.xCol) {
+      this.xCol = newParams.xCol;
+    } else if (newParams.yCols) {
+      this.yCols = newParams.yCols;
+    } else if (newParams.filters) {
+      this.filters = newParams.filters;
+    } else if (newParams.transform) {
+      this.transform = newParams.transform;
+    } else if (newParams.valuesCol) {
+      this.valuesCol = newParams.valuesCol;
+    } else if (newParams.colors) {
+      this.colors = newParams.colors;
+    } else if (newParams.xName) {
+      this.xName = newParams.xName;
+    }
   }
 
   /**
@@ -131,14 +134,14 @@ module.exports = class Series {
   filter(filterObj) {
     for (const [key, value] of Object.entries(filterObj)) {
       if (!Array.isArray(value)) {
-        this.df = this.df.filter((row) => row[key] == value);
+        this.data = this.data.filter((row) => row[key] == value);
       } else {
         value.map((filterValue) => {
-          this.df = this.df.filter((row) => row[key] == filterValue);
+          this.data = this.data.filter((row) => row[key] == filterValue);
         });
       }
     }
-    return this.df;
+    return this.data;
   }
   /**
    * For best performance, data should be pre-sorted. Sort should only be called prior to generating a new series with "generate"
@@ -148,12 +151,12 @@ module.exports = class Series {
   sort(by, how = "asc") {
     let sortedData = [];
     if (how == "asc") {
-      sortedData = this.df.slice().sort((a, b) => b[by] - a[by]);
+      sortedData = this.data.slice().sort((a, b) => b[by] - a[by]);
     } else if (how == "desc") {
-      sortedData = this.df.slice().sort((a, b) => a[by] - b[by]);
+      sortedData = this.data.slice().sort((a, b) => a[by] - b[by]);
     }
-    this.df = sortedData;
-    return this.df;
+    this.data = sortedData;
+    return this.data;
   }
 
   #findDataType(y, valuesCol) {
@@ -167,7 +170,7 @@ module.exports = class Series {
   #getUnique(filterColumns) {
     var lookup = {};
     var result = [];
-    for (var item, i = 0; (item = this.df[i++]); ) {
+    for (var item, i = 0; (item = this.data[i++]); ) {
       var name = item[filterColumns];
       if (!(name in lookup)) {
         lookup[name] = 1;
@@ -264,7 +267,7 @@ module.exports = class Series {
     });
     this.#properxName(xName);
     const yOperator = this.#yValues(transform);
-    this.df.map((row) => {
+    this.data.map((row) => {
       yCols.map((col) => {
         seriesData[col].push({
           [this.xName]: row[xCol],
@@ -290,7 +293,7 @@ module.exports = class Series {
     const seriesOperator = this.#seriesProperties(colors);
     this.#properxName(xName);
     const seriesData = variableColumn.map((v) => {
-      const variableSeries = this.df.filter((row) => row[yCols] == v);
+      const variableSeries = this.data.filter((row) => row[yCols] == v);
       const hcData = variableSeries.map((r) => {
         return {
           [this.xName]: r[xCol],
@@ -328,4 +331,5 @@ module.exports = class Series {
     }
     return this._series;
   }
-};
+}
+module.exports = Series;

@@ -1,7 +1,5 @@
 "use strict";
 
-var _findDataType, _getUnique, _seriesProperties, _properxName, _yValues, _nonTidyOperation, _tidyOperation, _temp, _findDataType2, _getUnique2, _seriesProperties2, _properxName2, _yValues2, _nonTidyOperation2, _tidyOperation2;
-
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
@@ -28,9 +26,23 @@ var id = 0;
 
 function _classPrivateFieldLooseKey(name) { return "__private_" + id++ + "_" + name; }
 
-module.exports = (_temp = (_findDataType = _classPrivateFieldLooseKey("findDataType"), _getUnique = _classPrivateFieldLooseKey("getUnique"), _seriesProperties = _classPrivateFieldLooseKey("seriesProperties"), _properxName = _classPrivateFieldLooseKey("properxName"), _yValues = _classPrivateFieldLooseKey("yValues"), _nonTidyOperation = _classPrivateFieldLooseKey("nonTidyOperation"), _tidyOperation = _classPrivateFieldLooseKey("tidyOperation"), /*#__PURE__*/function () {
+var _findDataType = _classPrivateFieldLooseKey("findDataType");
+
+var _getUnique = _classPrivateFieldLooseKey("getUnique");
+
+var _seriesProperties = _classPrivateFieldLooseKey("seriesProperties");
+
+var _properxName = _classPrivateFieldLooseKey("properxName");
+
+var _yValues = _classPrivateFieldLooseKey("yValues");
+
+var _nonTidyOperation = _classPrivateFieldLooseKey("nonTidyOperation");
+
+var _tidyOperation = _classPrivateFieldLooseKey("tidyOperation");
+
+var Series = /*#__PURE__*/function () {
   function Series(_ref) {
-    var df = _ref.df,
+    var data = _ref.data,
         _ref$chartType = _ref.chartType,
         chartType = _ref$chartType === void 0 ? undefined : _ref$chartType,
         _ref$xCol = _ref.xCol,
@@ -71,7 +83,7 @@ module.exports = (_temp = (_findDataType = _classPrivateFieldLooseKey("findDataT
     Object.defineProperty(this, _findDataType, {
       value: _findDataType2
     });
-    this._df = df;
+    this._data = data;
     this._chartType = chartType;
     this._xCol = _xCol;
     this._yCols = _yCols;
@@ -85,34 +97,31 @@ module.exports = (_temp = (_findDataType = _classPrivateFieldLooseKey("findDataT
 
   _createClass(Series, [{
     key: "update",
-    value: function update(_ref2) {
-      var _ref2$df = _ref2.df,
-          df = _ref2$df === void 0 ? this._df : _ref2$df,
-          _ref2$chartType = _ref2.chartType,
-          chartType = _ref2$chartType === void 0 ? this._chartType : _ref2$chartType,
-          _ref2$xCol = _ref2.xCol,
-          xCol = _ref2$xCol === void 0 ? this._xCol : _ref2$xCol,
-          _ref2$yCols = _ref2.yCols,
-          yCols = _ref2$yCols === void 0 ? this._yCols : _ref2$yCols,
-          _ref2$filters = _ref2.filters,
-          filters = _ref2$filters === void 0 ? this._filters : _ref2$filters,
-          _ref2$transform = _ref2.transform,
-          transform = _ref2$transform === void 0 ? this._transform : _ref2$transform,
-          _ref2$valuesCol = _ref2.valuesCol,
-          valuesCol = _ref2$valuesCol === void 0 ? this._valuesCol : _ref2$valuesCol,
-          _ref2$colors = _ref2.colors,
-          colors = _ref2$colors === void 0 ? this._colors : _ref2$colors,
-          _ref2$xName = _ref2.xName,
-          xName = _ref2$xName === void 0 ? this._xName : _ref2$xName;
-      this.df = df;
-      this.chartType = chartType;
-      this.xCol = xCol;
-      this.yCols = yCols;
-      this.filters = filters;
-      this.transform = transform;
-      this.valuesCol = valuesCol;
-      this.colors = colors;
-      this.xName = xName;
+
+    /**
+     *
+     * @param {*} newParams Object specifying new parameters for your Series class. Typical pattern involves calling update and then generate.
+     */
+    value: function update(newParams) {
+      if (newParams.data) {
+        this.data = newParams.data;
+      } else if (newParams.chartType) {
+        this.chartType = newParams.chartType;
+      } else if (newParams.xCol) {
+        this.xCol = newParams.xCol;
+      } else if (newParams.yCols) {
+        this.yCols = newParams.yCols;
+      } else if (newParams.filters) {
+        this.filters = newParams.filters;
+      } else if (newParams.transform) {
+        this.transform = newParams.transform;
+      } else if (newParams.valuesCol) {
+        this.valuesCol = newParams.valuesCol;
+      } else if (newParams.colors) {
+        this.colors = newParams.colors;
+      } else if (newParams.xName) {
+        this.xName = newParams.xName;
+      }
     }
     /**
      * For best performance, data should be pre-filtered where possible. filter should only be called prior to generating a new series with "generate"
@@ -130,12 +139,12 @@ module.exports = (_temp = (_findDataType = _classPrivateFieldLooseKey("findDataT
             value = _Object$entries$_i[1];
 
         if (!Array.isArray(value)) {
-          _this.df = _this.df.filter(function (row) {
+          _this.data = _this.data.filter(function (row) {
             return row[key] == value;
           });
         } else {
           value.map(function (filterValue) {
-            _this.df = _this.df.filter(function (row) {
+            _this.data = _this.data.filter(function (row) {
               return row[key] == filterValue;
             });
           });
@@ -146,7 +155,7 @@ module.exports = (_temp = (_findDataType = _classPrivateFieldLooseKey("findDataT
         _loop();
       }
 
-      return this.df;
+      return this.data;
     }
     /**
      * For best performance, data should be pre-sorted. Sort should only be called prior to generating a new series with "generate"
@@ -161,17 +170,17 @@ module.exports = (_temp = (_findDataType = _classPrivateFieldLooseKey("findDataT
       var sortedData = [];
 
       if (how == "asc") {
-        sortedData = this.df.slice().sort(function (a, b) {
+        sortedData = this.data.slice().sort(function (a, b) {
           return b[by] - a[by];
         });
       } else if (how == "desc") {
-        sortedData = this.df.slice().sort(function (a, b) {
+        sortedData = this.data.slice().sort(function (a, b) {
           return a[by] - b[by];
         });
       }
 
-      this.df = sortedData;
-      return this.df;
+      this.data = sortedData;
+      return this.data;
     }
   }, {
     key: "generate",
@@ -191,12 +200,12 @@ module.exports = (_temp = (_findDataType = _classPrivateFieldLooseKey("findDataT
       return this._series;
     }
   }, {
-    key: "df",
+    key: "data",
     get: function get() {
-      return this._df;
+      return this._data;
     },
     set: function set(newData) {
-      this._df = newData;
+      this._data = newData;
     }
   }, {
     key: "chartType",
@@ -273,17 +282,21 @@ module.exports = (_temp = (_findDataType = _classPrivateFieldLooseKey("findDataT
   }]);
 
   return Series;
-}()), _findDataType2 = function _findDataType2(y, valuesCol) {
+}();
+
+var _findDataType2 = function _findDataType2(y, valuesCol) {
   if (Array.isArray(y) && valuesCol == undefined) {
     this._dataType = "non-tidy";
   } else {
     this._dataType = "tidy";
   }
-}, _getUnique2 = function _getUnique2(filterColumns) {
+};
+
+var _getUnique2 = function _getUnique2(filterColumns) {
   var lookup = {};
   var result = [];
 
-  for (var item, i = 0; item = this.df[i++];) {
+  for (var item, i = 0; item = this.data[i++];) {
     var name = item[filterColumns];
 
     if (!(name in lookup)) {
@@ -293,7 +306,9 @@ module.exports = (_temp = (_findDataType = _classPrivateFieldLooseKey("findDataT
   }
 
   return result;
-}, _seriesProperties2 = function _seriesProperties2(colors) {
+};
+
+var _seriesProperties2 = function _seriesProperties2(colors) {
   if (colors !== undefined) {
     return function (seriesName, seriesData, customColors) {
       return {
@@ -310,7 +325,9 @@ module.exports = (_temp = (_findDataType = _classPrivateFieldLooseKey("findDataT
       };
     };
   }
-}, _properxName2 = function _properxName2(xName) {
+};
+
+var _properxName2 = function _properxName2(xName) {
   if (xName !== undefined) {
     return xName;
   }
@@ -322,7 +339,9 @@ module.exports = (_temp = (_findDataType = _classPrivateFieldLooseKey("findDataT
     this.xName = "x";
   } //TODO: add more chart types here
 
-}, _yValues2 = function _yValues2(transform) {
+};
+
+var _yValues2 = function _yValues2(transform) {
   if (!transform) {
     return function (r, c) {
       return r[c];
@@ -370,7 +389,9 @@ module.exports = (_temp = (_findDataType = _classPrivateFieldLooseKey("findDataT
       }
     }
   }
-}, _nonTidyOperation2 = function _nonTidyOperation2(xCol, yCols, transform, colors, xName) {
+};
+
+var _nonTidyOperation2 = function _nonTidyOperation2(xCol, yCols, transform, colors, xName) {
   var _this2 = this;
 
   var seriesData = {};
@@ -384,7 +405,7 @@ module.exports = (_temp = (_findDataType = _classPrivateFieldLooseKey("findDataT
 
   var yOperator = _classPrivateFieldLooseBase(this, _yValues)[_yValues](transform);
 
-  this.df.map(function (row) {
+  this.data.map(function (row) {
     yCols.map(function (col) {
       var _seriesData$col$push;
 
@@ -407,7 +428,9 @@ module.exports = (_temp = (_findDataType = _classPrivateFieldLooseKey("findDataT
   }
 
   return seriesResult;
-}, _tidyOperation2 = function _tidyOperation2(xCol, yCols, transform, colors, valuesCol, xName) {
+};
+
+var _tidyOperation2 = function _tidyOperation2(xCol, yCols, transform, colors, valuesCol, xName) {
   var _this3 = this;
 
   var variableColumn = _classPrivateFieldLooseBase(this, _getUnique)[_getUnique](yCols);
@@ -419,16 +442,18 @@ module.exports = (_temp = (_findDataType = _classPrivateFieldLooseKey("findDataT
   _classPrivateFieldLooseBase(this, _properxName)[_properxName](xName);
 
   var seriesData = variableColumn.map(function (v) {
-    var variableSeries = _this3.df.filter(function (row) {
+    var variableSeries = _this3.data.filter(function (row) {
       return row[yCols] == v;
     });
 
     var hcData = variableSeries.map(function (r) {
-      var _ref3;
+      var _ref2;
 
-      return _ref3 = {}, _defineProperty(_ref3, _this3.xName, r[xCol]), _defineProperty(_ref3, "y", yOperator(r, valuesCol)), _ref3;
+      return _ref2 = {}, _defineProperty(_ref2, _this3.xName, r[xCol]), _defineProperty(_ref2, "y", yOperator(r, valuesCol)), _ref2;
     });
     return seriesOperator(v, hcData, colors);
   });
   return seriesData;
-}, _temp);
+};
+
+module.exports = Series;
