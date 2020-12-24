@@ -48,13 +48,11 @@ let units = { baseUnits: "Mb/d", secondaryUnits: "m3/d" };
 
 const createTidyChart = (data, filters) => {
   let t0 = performance.now();
-  const series = new Series({ data: data, chartType: "line" });
-  series.addProperty("color", colors);
+  const series = new Series({ data: data, chartType: "line", colors: colors });
   series.xCol = "Period";
   series.yCols = "Mode of Transportation";
   series.valuesCol = "Volume (Mb/d)";
   series.filters = filters;
-  series.addData();
 
   let tidyChart = loadChart(series.series, "container-tidy");
   let t1 = performance.now();
@@ -68,12 +66,10 @@ const createTidyChart = (data, filters) => {
 
 const createNonTidyChart = (data, filters) => {
   let t0 = performance.now();
-  const series = new Series({ data: data, chartType: "line" });
-  series.addProperty("color", colors);
+  const series = new Series({ data: data, chartType: "line", colors: colors });
   series.xCol = "Period";
   series.yCols = ["Marine", "Pipeline", "Railway", "Truck"];
   series.filters = filters;
-  series.addData();
   let nonTidyChart = loadChart(series.series, "container-nonTidy");
   let t1 = performance.now();
   nonTidyChart.update({
@@ -85,13 +81,13 @@ const createNonTidyChart = (data, filters) => {
 };
 
 let [chartTidy, seriesTidy] = createTidyChart(tidy, filters);
-//let [chartNonTidy, seriesNonTidy] = createNonTidyChart(nonTidy, filters);
+let [chartNonTidy, seriesNonTidy] = createNonTidyChart(nonTidy, filters);
 
 const updateCharts = (chart, series, filters, data) => {
   let t0TidyProduct = performance.now();
   series.update({ data: data, filters: filters }, true);
   chart = loadChart(series.series, "container-tidy");
-  console.log(series)
+  console.log(series);
   //nonTidyChart = loadChart(series.series, "container-nonTidy");
   chart.update({
     title: {

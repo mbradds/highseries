@@ -4,6 +4,7 @@ class Series {
     chartType = undefined,
     xCol = undefined,
     yCols = undefined,
+    colors = undefined,
     filters = undefined,
     transform = undefined,
     valuesCol = undefined,
@@ -13,6 +14,7 @@ class Series {
     this._chartType = chartType;
     this._xCol = xCol;
     this._yCols = yCols;
+    this._colors = colors;
     this._filters = filters;
     this._transform = transform;
     this._valuesCol = valuesCol;
@@ -50,6 +52,14 @@ class Series {
 
   set yCols(newyCols) {
     this._yCols = newyCols;
+  }
+
+  get colors() {
+    return this._colors;
+  }
+
+  set colors(newColors) {
+    this._colors = newColors;
   }
 
   get filters() {
@@ -102,9 +112,9 @@ class Series {
 
   /**
    *
-   * @param {*} newParams Object specifying new parameters for your Series class. Typical pattern involves calling update and then addData.
+   * @param {*} newParams Object specifying new parameters for your Series class. Typical pattern involves calling update and then generate.
    */
-  update(newParams, reloadData = false) {
+  update(newParams) {
     if (newParams.hasOwnProperty("data")) {
       this.data = newParams.data;
     }
@@ -129,13 +139,10 @@ class Series {
     if (newParams.hasOwnProperty("xName")) {
       this.xName = newParams.xName;
     }
-    if (reloadData) {
-      this.addData();
-    }
   }
 
   /**
-   * For best performance, data should be pre-filtered where possible. filter should only be called prior to generating a new series with "addData"
+   * For best performance, data should be pre-filtered where possible. filter should only be called prior to generating a new series with "generate"
    * @param {*} filterObj Object specifying key(s) (column name) and values (column value). A subset of the original data will be returned where the column name equals the value.
    */
   filter(filterObj) {
@@ -151,7 +158,7 @@ class Series {
     return this.data;
   }
   /**
-   * For best performance, data should be pre-sorted. Sort should only be called prior to generating a new series with "addData"
+   * For best performance, data should be pre-sorted. Sort should only be called prior to generating a new series with "generate"
    * @param {*} by The column name to sort on. This column will typically be the data "index", such as a date.
    * @param {*} how Enter either "asc" (ascending order) or "desc" (descending order). Default is "asc"
    */
@@ -254,21 +261,20 @@ class Series {
     const seriesData = {};
     const colTotals = {};
     yCols.map((col) => {
-      seriesData[col] = [];
+      seriesData[col] = { data: [] };
       colTotals[col] = 0;
     });
     this.#properxName(xName);
     const yOperator = this.#yValues(transform);
     this.data.map((row) => {
       yCols.map((col) => {
-        seriesData[col].push({
+        seriesData[col].data.push({
           [this.xName]: row[xCol],
           y: yOperator(row, col),
         });
         colTotals[col] = colTotals[col] + row[col];
       });
     });
-    const seriesResult = [];
     return seriesData;
   }
 
@@ -285,13 +291,16 @@ class Series {
           y: yOperator(r, valuesCol),
         };
       });
-      dataResult[v] = hcData;
+      dataResult[v] = { data: hcData };
     });
     return dataResult;
   }
 
   //TODO: change this to get series() or get hcdata() and remove series from constructor
-  addData() {
+  get series() {
+    if (!this.data) {
+      return [];
+    }
     this.#findDataType(this.yCols, this.valuesCol);
     if (this.filters) {
       this.filter(this.filters);
@@ -313,25 +322,18 @@ class Series {
         this.xName
       );
     }
-    this.addProperty("data", dataResult);
-  }
-
-  addProperty(propertyName, propertyObj) {
-    let newSeries = [];
-    for (const [key, value] of Object.entries(propertyObj)) {
-      let exists = false;
-      this.series.map((s) => {
-        if (s.hasOwnProperty("name") && s.name == key) {
-          s[propertyName] = value;
-          newSeries.push(s);
-          exists = true;
-        }
-      });
-      if (!exists) {
-        newSeries.push({ name: key, [propertyName]: value });
+    if (this.colors) {
+      for (const [key, value] of Object.entries(dataResult)) {
+        dataResult[key].color = this.colors[key];
+        //TODO: raise error if the data name doesnt have a corresponding color
       }
     }
-    this.series = newSeries;
+    let newSeries = [];
+    for (let [key, value] of Object.entries(dataResult)) {
+      value.name = key;
+      newSeries.push(value);
+    }
+    return newSeries;
   }
 }
 module.exports = Series;
