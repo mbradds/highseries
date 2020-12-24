@@ -48,14 +48,15 @@ let units = { baseUnits: "Mb/d", secondaryUnits: "m3/d" };
 
 const createTidyChart = (data, filters) => {
   let t0 = performance.now();
-  const series = new Series({ data: data, chartType: "line", colors: colors });
+  const series = new Series({ data: data, chartType: "line" });
+  series.addProperty("color", colors);
   series.xCol = "Period";
   series.yCols = "Mode of Transportation";
   series.valuesCol = "Volume (Mb/d)";
   series.filters = filters;
-  let hcSeries = series.generate();
+  series.addData();
 
-  let tidyChart = loadChart(hcSeries, "container-tidy");
+  let tidyChart = loadChart(series.series, "container-tidy");
   let t1 = performance.now();
   tidyChart.update({
     title: {
@@ -67,12 +68,13 @@ const createTidyChart = (data, filters) => {
 
 const createNonTidyChart = (data, filters) => {
   let t0 = performance.now();
-  const series = new Series({ data: data, chartType: "line", colors: colors });
+  const series = new Series({ data: data, chartType: "line" });
+  series.addProperty("color", colors);
   series.xCol = "Period";
   series.yCols = ["Marine", "Pipeline", "Railway", "Truck"];
   series.filters = filters;
-  let hcSeries = series.generate();
-  let nonTidyChart = loadChart(hcSeries, "container-nonTidy");
+  series.addData();
+  let nonTidyChart = loadChart(series.series, "container-nonTidy");
   let t1 = performance.now();
   nonTidyChart.update({
     title: {
@@ -83,18 +85,17 @@ const createNonTidyChart = (data, filters) => {
 };
 
 let [chartTidy, seriesTidy] = createTidyChart(tidy, filters);
-let [chartNonTidy, seriesNonTidy] = createNonTidyChart(nonTidy, filters);
+//let [chartNonTidy, seriesNonTidy] = createNonTidyChart(nonTidy, filters);
 
 const updateCharts = (chart, series, filters, data) => {
   let t0TidyProduct = performance.now();
-  series.update({ data: data, filters: filters });
-  for (var i = 0; i < chart.series.length; i++) {
-    chart.series[i].setData([]);
-  }
+  series.update({ data: data, filters: filters }, true);
+  chart = loadChart(series.series, "container-tidy");
+  console.log(series)
+  //nonTidyChart = loadChart(series.series, "container-nonTidy");
   chart.update({
-    series: series.generate(),
     title: {
-      text: `Tidy update time ${(performance.now() - t0TidyProduct).toFixed(
+      text: `Update time ${(performance.now() - t0TidyProduct).toFixed(
         1
       )} milliseconds`,
     },
@@ -107,51 +108,50 @@ selectProduct.addEventListener("change", (selectProduct) => {
   filters.Product = selectProduct.target.value;
   [chartTidy, seriesTidy] = updateCharts(chartTidy, seriesTidy, filters, tidy);
 
-  [chartNonTidy, seriesNonTidy] = updateCharts(
-    chartNonTidy,
-    seriesNonTidy,
-    filters,
-    nonTidy
-  );
+  // [chartNonTidy, seriesNonTidy] = updateCharts(
+  //   chartNonTidy,
+  //   seriesNonTidy,
+  //   filters,
+  //   nonTidy
+  // );
 });
 
 let selectRegion = document.getElementById("select-region");
 selectRegion.addEventListener("change", (selectRegion) => {
   filters.Origin = selectRegion.target.value;
   [chartTidy, seriesTidy] = updateCharts(chartTidy, seriesTidy, filters, tidy);
-
-  [chartNonTidy, seriesNonTidy] = updateCharts(
-    chartNonTidy,
-    seriesNonTidy,
-    filters,
-    nonTidy
-  );
+  // [chartNonTidy, seriesNonTidy] = updateCharts(
+  //   chartNonTidy,
+  //   seriesNonTidy,
+  //   filters,
+  //   nonTidy
+  // );
 });
 
 let selectUnits = document.getElementById("select-units");
 selectUnits.addEventListener("change", (selectUnits) => {
   let currentUnits = selectUnits.target.value;
   if (currentUnits == units.baseUnits) {
-    seriesTidy.update({ data: tidy, transform: false });
-    seriesNonTidy.update({ data: nonTidy, transform: false });
+    seriesTidy.update({ data: tidy, transform: false }, true);
+    //seriesNonTidy.update({ data: nonTidy, transform: false }, true);
   } else {
-    seriesTidy.update({ data: tidy, transform: transform });
-    seriesNonTidy.update({ data: nonTidy, transform: transform });
+    seriesTidy.update({ data: tidy, transform: transform }, true);
+    //seriesNonTidy.update({ data: nonTidy, transform: transform }, true);
   }
   chartTidy.update({
-    series: seriesTidy.generate(),
+    series: seriesTidy.series,
     yAxis: {
       title: {
         text: `Exports ${currentUnits}`,
       },
     },
   });
-  chartNonTidy.update({
-    series: seriesNonTidy.generate(),
-    yAxis: {
-      title: {
-        text: `Exports ${currentUnits}`,
-      },
-    },
-  });
+  // chartNonTidy.update({
+  //   series: seriesNonTidy.series,
+  //   yAxis: {
+  //     title: {
+  //       text: `Exports ${currentUnits}`,
+  //     },
+  //   },
+  // });
 });

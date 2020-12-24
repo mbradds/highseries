@@ -7,7 +7,6 @@ class Series {
     filters = undefined,
     transform = undefined,
     valuesCol = undefined,
-    colors = undefined,
     xName = "x",
   }) {
     this._data = data;
@@ -17,9 +16,8 @@ class Series {
     this._filters = filters;
     this._transform = transform;
     this._valuesCol = valuesCol;
-    this._colors = colors;
     this._xName = xName;
-    this._series = undefined;
+    this._series = [];
   }
 
   get data() {
@@ -36,14 +34,6 @@ class Series {
 
   set chartType(chartType) {
     this._chartType = chartType;
-  }
-
-  get colors() {
-    return this._colors;
-  }
-
-  set colors(newColors) {
-    this._colors = newColors;
   }
 
   get xCol() {
@@ -101,34 +91,51 @@ class Series {
   set dataType(newDataType) {
     this._dataType = newDataType;
   }
+
+  get series() {
+    return this._series;
+  }
+
+  set series(newSeries) {
+    this._series = newSeries;
+  }
+
   /**
    *
-   * @param {*} newParams Object specifying new parameters for your Series class. Typical pattern involves calling update and then generate.
+   * @param {*} newParams Object specifying new parameters for your Series class. Typical pattern involves calling update and then addData.
    */
-  update(newParams) {
-    if (newParams.data) {
+  update(newParams, reloadData = false) {
+    if (newParams.hasOwnProperty("data")) {
       this.data = newParams.data;
-    } else if (newParams.chartType) {
+    }
+    if (newParams.hasOwnProperty("chartType")) {
       this.chartType = newParams.chartType;
-    } else if (newParams.xCol) {
+    }
+    if (newParams.hasOwnProperty("xCol")) {
       this.xCol = newParams.xCol;
-    } else if (newParams.yCols) {
+    }
+    if (newParams.hasOwnProperty("yCols")) {
       this.yCols = newParams.yCols;
-    } else if (newParams.filters) {
+    }
+    if (newParams.hasOwnProperty("filters")) {
       this.filters = newParams.filters;
-    } else if (newParams.transform) {
+    }
+    if (newParams.hasOwnProperty("transform")) {
       this.transform = newParams.transform;
-    } else if (newParams.valuesCol) {
+    }
+    if (newParams.hasOwnProperty("valuesCol")) {
       this.valuesCol = newParams.valuesCol;
-    } else if (newParams.colors) {
-      this.colors = newParams.colors;
-    } else if (newParams.xName) {
+    }
+    if (newParams.hasOwnProperty("xName")) {
       this.xName = newParams.xName;
+    }
+    if (reloadData) {
+      this.addData();
     }
   }
 
   /**
-   * For best performance, data should be pre-filtered where possible. filter should only be called prior to generating a new series with "generate"
+   * For best performance, data should be pre-filtered where possible. filter should only be called prior to generating a new series with "addData"
    * @param {*} filterObj Object specifying key(s) (column name) and values (column value). A subset of the original data will be returned where the column name equals the value.
    */
   filter(filterObj) {
@@ -144,7 +151,7 @@ class Series {
     return this.data;
   }
   /**
-   * For best performance, data should be pre-sorted. Sort should only be called prior to generating a new series with "generate"
+   * For best performance, data should be pre-sorted. Sort should only be called prior to generating a new series with "addData"
    * @param {*} by The column name to sort on. This column will typically be the data "index", such as a date.
    * @param {*} how Enter either "asc" (ascending order) or "desc" (descending order). Default is "asc"
    */
@@ -178,21 +185,6 @@ class Series {
       }
     }
     return result;
-  }
-
-  #seriesProperties(colors) {
-    if (colors !== undefined) {
-      return (seriesName, seriesData, customColors) => ({
-        name: seriesName,
-        data: seriesData,
-        color: customColors[seriesName],
-      });
-    } else {
-      return (seriesName, seriesData, customColors) => ({
-        name: seriesName,
-        data: seriesData,
-      });
-    }
   }
 
   #properxName(xName) {
@@ -258,7 +250,7 @@ class Series {
     }
   }
 
-  #nonTidyOperation(xCol, yCols, transform, colors, xName) {
+  #nonTidyOperation(xCol, yCols, transform, xName) {
     const seriesData = {};
     const colTotals = {};
     yCols.map((col) => {
@@ -277,21 +269,14 @@ class Series {
       });
     });
     const seriesResult = [];
-
-    const seriesOperator = this.#seriesProperties(colors);
-    for (const [key, value] of Object.entries(seriesData)) {
-      if (colTotals[key] !== 0) {
-        seriesResult.push(seriesOperator(key, value, colors));
-      }
-    }
-    return seriesResult;
+    return seriesData;
   }
 
-  #tidyOperation(xCol, yCols, transform, colors, valuesCol, xName) {
+  #tidyOperation(xCol, yCols, transform, valuesCol, xName) {
     const variableColumn = this.#getUnique(yCols);
     const yOperator = this.#yValues(transform);
-    const seriesOperator = this.#seriesProperties(colors);
     this.#properxName(xName);
+    const dataResult = {};
     const seriesData = variableColumn.map((v) => {
       const variableSeries = this.data.filter((row) => row[yCols] == v);
       const hcData = variableSeries.map((r) => {
@@ -300,36 +285,53 @@ class Series {
           y: yOperator(r, valuesCol),
         };
       });
-      return seriesOperator(v, hcData, colors);
+      dataResult[v] = hcData;
     });
-
-    return seriesData;
+    return dataResult;
   }
 
-  generate() {
+  //TODO: change this to get series() or get hcdata() and remove series from constructor
+  addData() {
     this.#findDataType(this.yCols, this.valuesCol);
     if (this.filters) {
       this.filter(this.filters);
     }
+    let dataResult = undefined;
     if (this.dataType == "non-tidy") {
-      this._series = this.#nonTidyOperation(
+      dataResult = this.#nonTidyOperation(
         this.xCol,
         this.yCols,
         this.transform,
-        this.colors,
         this.xName
       );
     } else {
-      this._series = this.#tidyOperation(
+      dataResult = this.#tidyOperation(
         this.xCol,
         this.yCols,
         this.transform,
-        this.colors,
         this.valuesCol,
         this.xName
       );
     }
-    return this._series;
+    this.addProperty("data", dataResult);
+  }
+
+  addProperty(propertyName, propertyObj) {
+    let newSeries = [];
+    for (const [key, value] of Object.entries(propertyObj)) {
+      let exists = false;
+      this.series.map((s) => {
+        if (s.hasOwnProperty("name") && s.name == key) {
+          s[propertyName] = value;
+          newSeries.push(s);
+          exists = true;
+        }
+      });
+      if (!exists) {
+        newSeries.push({ name: key, [propertyName]: value });
+      }
+    }
+    this.series = newSeries;
   }
 }
 module.exports = Series;

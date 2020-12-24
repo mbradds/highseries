@@ -30,8 +30,6 @@ var _findDataType = _classPrivateFieldLooseKey("findDataType");
 
 var _getUnique = _classPrivateFieldLooseKey("getUnique");
 
-var _seriesProperties = _classPrivateFieldLooseKey("seriesProperties");
-
 var _properxName = _classPrivateFieldLooseKey("properxName");
 
 var _yValues = _classPrivateFieldLooseKey("yValues");
@@ -55,8 +53,6 @@ var Series = /*#__PURE__*/function () {
         _transform = _ref$transform === void 0 ? undefined : _ref$transform,
         _ref$valuesCol = _ref.valuesCol,
         _valuesCol = _ref$valuesCol === void 0 ? undefined : _ref$valuesCol,
-        _ref$colors = _ref.colors,
-        _colors = _ref$colors === void 0 ? undefined : _ref$colors,
         _ref$xName = _ref.xName,
         _xName = _ref$xName === void 0 ? "x" : _ref$xName;
 
@@ -74,9 +70,6 @@ var Series = /*#__PURE__*/function () {
     Object.defineProperty(this, _properxName, {
       value: _properxName2
     });
-    Object.defineProperty(this, _seriesProperties, {
-      value: _seriesProperties2
-    });
     Object.defineProperty(this, _getUnique, {
       value: _getUnique2
     });
@@ -90,9 +83,8 @@ var Series = /*#__PURE__*/function () {
     this._filters = filters;
     this._transform = _transform;
     this._valuesCol = _valuesCol;
-    this._colors = _colors;
     this._xName = _xName;
-    this._series = undefined;
+    this._series = [];
   }
 
   _createClass(Series, [{
@@ -100,31 +92,49 @@ var Series = /*#__PURE__*/function () {
 
     /**
      *
-     * @param {*} newParams Object specifying new parameters for your Series class. Typical pattern involves calling update and then generate.
+     * @param {*} newParams Object specifying new parameters for your Series class. Typical pattern involves calling update and then addData.
      */
     value: function update(newParams) {
-      if (newParams.data) {
+      var reloadData = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : false;
+
+      if (newParams.hasOwnProperty("data")) {
         this.data = newParams.data;
-      } else if (newParams.chartType) {
+      }
+
+      if (newParams.hasOwnProperty("chartType")) {
         this.chartType = newParams.chartType;
-      } else if (newParams.xCol) {
+      }
+
+      if (newParams.hasOwnProperty("xCol")) {
         this.xCol = newParams.xCol;
-      } else if (newParams.yCols) {
+      }
+
+      if (newParams.hasOwnProperty("yCols")) {
         this.yCols = newParams.yCols;
-      } else if (newParams.filters) {
+      }
+
+      if (newParams.hasOwnProperty("filters")) {
         this.filters = newParams.filters;
-      } else if (newParams.transform) {
+      }
+
+      if (newParams.hasOwnProperty("transform")) {
         this.transform = newParams.transform;
-      } else if (newParams.valuesCol) {
+      }
+
+      if (newParams.hasOwnProperty("valuesCol")) {
         this.valuesCol = newParams.valuesCol;
-      } else if (newParams.colors) {
-        this.colors = newParams.colors;
-      } else if (newParams.xName) {
+      }
+
+      if (newParams.hasOwnProperty("xName")) {
         this.xName = newParams.xName;
+      }
+
+      if (reloadData) {
+        this.addData();
       }
     }
     /**
-     * For best performance, data should be pre-filtered where possible. filter should only be called prior to generating a new series with "generate"
+     * For best performance, data should be pre-filtered where possible. filter should only be called prior to generating a new series with "addData"
      * @param {*} filterObj Object specifying key(s) (column name) and values (column value). A subset of the original data will be returned where the column name equals the value.
      */
 
@@ -158,7 +168,7 @@ var Series = /*#__PURE__*/function () {
       return this.data;
     }
     /**
-     * For best performance, data should be pre-sorted. Sort should only be called prior to generating a new series with "generate"
+     * For best performance, data should be pre-sorted. Sort should only be called prior to generating a new series with "addData"
      * @param {*} by The column name to sort on. This column will typically be the data "index", such as a date.
      * @param {*} how Enter either "asc" (ascending order) or "desc" (descending order). Default is "asc"
      */
@@ -183,21 +193,59 @@ var Series = /*#__PURE__*/function () {
       return this.data;
     }
   }, {
-    key: "generate",
-    value: function generate() {
+    key: "addData",
+    //TODO: change this to get series() or get hcdata() and remove series from constructor
+    value: function addData() {
       _classPrivateFieldLooseBase(this, _findDataType)[_findDataType](this.yCols, this.valuesCol);
 
       if (this.filters) {
         this.filter(this.filters);
       }
 
+      var dataResult = undefined;
+
       if (this.dataType == "non-tidy") {
-        this._series = _classPrivateFieldLooseBase(this, _nonTidyOperation)[_nonTidyOperation](this.xCol, this.yCols, this.transform, this.colors, this.xName);
+        dataResult = _classPrivateFieldLooseBase(this, _nonTidyOperation)[_nonTidyOperation](this.xCol, this.yCols, this.transform, this.xName);
       } else {
-        this._series = _classPrivateFieldLooseBase(this, _tidyOperation)[_tidyOperation](this.xCol, this.yCols, this.transform, this.colors, this.valuesCol, this.xName);
+        dataResult = _classPrivateFieldLooseBase(this, _tidyOperation)[_tidyOperation](this.xCol, this.yCols, this.transform, this.valuesCol, this.xName);
       }
 
-      return this._series;
+      this.addProperty("data", dataResult);
+    }
+  }, {
+    key: "addProperty",
+    value: function addProperty(propertyName, propertyObj) {
+      var _this2 = this;
+
+      var newSeries = [];
+
+      var _loop2 = function _loop2() {
+        var _Object$entries2$_i = _slicedToArray(_Object$entries2[_i2], 2),
+            key = _Object$entries2$_i[0],
+            value = _Object$entries2$_i[1];
+
+        var exists = false;
+
+        _this2.series.map(function (s) {
+          if (s.hasOwnProperty("name") && s.name == key) {
+            s[propertyName] = value;
+            newSeries.push(s);
+            exists = true;
+          }
+        });
+
+        if (!exists) {
+          newSeries.push(_defineProperty({
+            name: key
+          }, propertyName, value));
+        }
+      };
+
+      for (var _i2 = 0, _Object$entries2 = Object.entries(propertyObj); _i2 < _Object$entries2.length; _i2++) {
+        _loop2();
+      }
+
+      this.series = newSeries;
     }
   }, {
     key: "data",
@@ -214,14 +262,6 @@ var Series = /*#__PURE__*/function () {
     },
     set: function set(chartType) {
       this._chartType = chartType;
-    }
-  }, {
-    key: "colors",
-    get: function get() {
-      return this._colors;
-    },
-    set: function set(newColors) {
-      this._colors = newColors;
     }
   }, {
     key: "xCol",
@@ -279,6 +319,14 @@ var Series = /*#__PURE__*/function () {
     set: function set(newDataType) {
       this._dataType = newDataType;
     }
+  }, {
+    key: "series",
+    get: function get() {
+      return this._series;
+    },
+    set: function set(newSeries) {
+      this._series = newSeries;
+    }
   }]);
 
   return Series;
@@ -306,25 +354,6 @@ var _getUnique2 = function _getUnique2(filterColumns) {
   }
 
   return result;
-};
-
-var _seriesProperties2 = function _seriesProperties2(colors) {
-  if (colors !== undefined) {
-    return function (seriesName, seriesData, customColors) {
-      return {
-        name: seriesName,
-        data: seriesData,
-        color: customColors[seriesName]
-      };
-    };
-  } else {
-    return function (seriesName, seriesData, customColors) {
-      return {
-        name: seriesName,
-        data: seriesData
-      };
-    };
-  }
 };
 
 var _properxName2 = function _properxName2(xName) {
@@ -391,8 +420,8 @@ var _yValues2 = function _yValues2(transform) {
   }
 };
 
-var _nonTidyOperation2 = function _nonTidyOperation2(xCol, yCols, transform, colors, xName) {
-  var _this2 = this;
+var _nonTidyOperation2 = function _nonTidyOperation2(xCol, yCols, transform, xName) {
+  var _this3 = this;
 
   var seriesData = {};
   var colTotals = {};
@@ -409,51 +438,37 @@ var _nonTidyOperation2 = function _nonTidyOperation2(xCol, yCols, transform, col
     yCols.map(function (col) {
       var _seriesData$col$push;
 
-      seriesData[col].push((_seriesData$col$push = {}, _defineProperty(_seriesData$col$push, _this2.xName, row[xCol]), _defineProperty(_seriesData$col$push, "y", yOperator(row, col)), _seriesData$col$push));
+      seriesData[col].push((_seriesData$col$push = {}, _defineProperty(_seriesData$col$push, _this3.xName, row[xCol]), _defineProperty(_seriesData$col$push, "y", yOperator(row, col)), _seriesData$col$push));
       colTotals[col] = colTotals[col] + row[col];
     });
   });
   var seriesResult = [];
-
-  var seriesOperator = _classPrivateFieldLooseBase(this, _seriesProperties)[_seriesProperties](colors);
-
-  for (var _i2 = 0, _Object$entries2 = Object.entries(seriesData); _i2 < _Object$entries2.length; _i2++) {
-    var _Object$entries2$_i = _slicedToArray(_Object$entries2[_i2], 2),
-        key = _Object$entries2$_i[0],
-        value = _Object$entries2$_i[1];
-
-    if (colTotals[key] !== 0) {
-      seriesResult.push(seriesOperator(key, value, colors));
-    }
-  }
-
-  return seriesResult;
+  return seriesData;
 };
 
-var _tidyOperation2 = function _tidyOperation2(xCol, yCols, transform, colors, valuesCol, xName) {
-  var _this3 = this;
+var _tidyOperation2 = function _tidyOperation2(xCol, yCols, transform, valuesCol, xName) {
+  var _this4 = this;
 
   var variableColumn = _classPrivateFieldLooseBase(this, _getUnique)[_getUnique](yCols);
 
   var yOperator = _classPrivateFieldLooseBase(this, _yValues)[_yValues](transform);
 
-  var seriesOperator = _classPrivateFieldLooseBase(this, _seriesProperties)[_seriesProperties](colors);
-
   _classPrivateFieldLooseBase(this, _properxName)[_properxName](xName);
 
+  var dataResult = {};
   var seriesData = variableColumn.map(function (v) {
-    var variableSeries = _this3.data.filter(function (row) {
+    var variableSeries = _this4.data.filter(function (row) {
       return row[yCols] == v;
     });
 
     var hcData = variableSeries.map(function (r) {
       var _ref2;
 
-      return _ref2 = {}, _defineProperty(_ref2, _this3.xName, r[xCol]), _defineProperty(_ref2, "y", yOperator(r, valuesCol)), _ref2;
+      return _ref2 = {}, _defineProperty(_ref2, _this4.xName, r[xCol]), _defineProperty(_ref2, "y", yOperator(r, valuesCol)), _ref2;
     });
-    return seriesOperator(v, hcData, colors);
+    dataResult[v] = hcData;
   });
-  return seriesData;
+  return dataResult;
 };
 
 module.exports = Series;
