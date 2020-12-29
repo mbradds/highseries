@@ -1,13 +1,6 @@
 import Series from "../dist/index.js";
-const getData = (Url) => {
-  var Httpreq = new XMLHttpRequest(); // a new request
-  Httpreq.open("GET", Url, false);
-  Httpreq.send(null);
-  return JSON.parse(Httpreq.responseText);
-};
-
-const nonTidy = getData("./test_data/non-tidy.json");
-const tidy = getData("./test_data/tidy.json");
+import nonTidy from "./test_data/non-tidy.json"
+import tidy from "./test_data/tidy.json"
 
 const loadChart = (series, div) => {
   return new Highcharts.chart(div, {
