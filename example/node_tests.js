@@ -16,11 +16,18 @@ const colors = {
   Railway: "Green",
   Truck: "Yellow",
 };
+const zIndex = {
+  Marine: 4,
+  Pipeline: 3,
+  Railway: 2,
+  Truck: 1,
+};
 
 const seriesTidy = new Series({
   data: tidy,
   chartType: "line",
   colors: colors,
+  zIndex: zIndex,
 });
 seriesTidy.update({
   xCol: "Period",
@@ -29,7 +36,7 @@ seriesTidy.update({
   filters: filters,
   //transform: transform,
 });
-//console.log(seriesTidy.series)
+//console.log(seriesTidy.hcSeries[0]);
 
 const seriesNonTidy = new Series({
   data: nonTidy,
@@ -39,4 +46,4 @@ const seriesNonTidy = new Series({
 seriesNonTidy.xCol = "Period";
 seriesNonTidy.yCols = ["Marine", "Pipeline", "Railway", "Truck"];
 seriesNonTidy.filters = filters;
-console.log(seriesNonTidy.series);
+console.log(seriesNonTidy.hcSeries[0]);

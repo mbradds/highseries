@@ -5,6 +5,8 @@ class Series {
     xCol = undefined,
     yCols = undefined,
     colors = undefined,
+    zIndex = undefined,
+    seriesTypes = undefined,
     filters = undefined,
     transform = undefined,
     valuesCol = undefined,
@@ -15,11 +17,12 @@ class Series {
     this._xCol = xCol;
     this._yCols = yCols;
     this._colors = colors;
+    this._zIndex = zIndex;
+    this._seriesTypes = seriesTypes;
     this._filters = filters;
     this._transform = transform;
     this._valuesCol = valuesCol;
     this._xName = xName;
-    this._series = [];
   }
 
   get data() {
@@ -62,6 +65,22 @@ class Series {
     this._colors = newColors;
   }
 
+  get zIndex() {
+    return this._zIndex;
+  }
+
+  set zIndex(newZ) {
+    this._zIndex = newZ;
+  }
+
+  get seriesTypes() {
+    return this._seriesTypes;
+  }
+
+  set seriesTypes(newTypes) {
+    this._seriesTypes = newTypes;
+  }
+
   get filters() {
     return this._filters;
   }
@@ -102,14 +121,6 @@ class Series {
     this._dataType = newDataType;
   }
 
-  get series() {
-    return this._series;
-  }
-
-  set series(newSeries) {
-    this._series = newSeries;
-  }
-
   /**
    *
    * @param {*} newParams Object specifying new parameters for your Series class. Typical pattern involves calling update and then generate.
@@ -126,6 +137,12 @@ class Series {
     }
     if (newParams.hasOwnProperty("yCols")) {
       this.yCols = newParams.yCols;
+    }
+    if (newParams.hasOwnProperty("colors")) {
+      this.colors = newParams.colors;
+    }
+    if (newParams.hasOwnProperty("zIndex")) {
+      this.zIndex = newParams.zIndex;
     }
     if (newParams.hasOwnProperty("filters")) {
       this.filters = newParams.filters;
@@ -258,17 +275,20 @@ class Series {
   }
 
   #nonTidyOperation(xCol, yCols, transform, xName) {
+    if (this.filters) {
+      this.filter(this.filters);
+    }
     const seriesData = {};
     const colTotals = {};
     yCols.map((col) => {
-      seriesData[col] = { data: [] };
+      seriesData[col] = [];
       colTotals[col] = 0;
     });
     this.#properxName(xName);
     const yOperator = this.#yValues(transform);
     this.data.map((row) => {
       yCols.map((col) => {
-        seriesData[col].data.push({
+        seriesData[col].push({
           [this.xName]: row[xCol],
           y: yOperator(row, col),
         });
@@ -279,6 +299,9 @@ class Series {
   }
 
   #tidyOperation(xCol, yCols, transform, valuesCol, xName) {
+    if (this.filters) {
+      this.filter(this.filters);
+    }
     const variableColumn = this.#getUnique(yCols);
     const yOperator = this.#yValues(transform);
     this.#properxName(xName);
@@ -291,20 +314,31 @@ class Series {
           y: yOperator(r, valuesCol),
         };
       });
-      dataResult[v] = { data: hcData };
+      dataResult[v] = hcData;
     });
     return dataResult;
   }
 
+  #addProperty(propertyName, source, target) {
+    let newProperty = {};
+    for (const [key, value] of Object.entries(target)) {
+      newProperty[key] = { [propertyName]: value };
+    }
+
+    for (const [key, value] of Object.entries(newProperty)) {
+      if (source.hasOwnProperty(key)) {
+        source[key] = { ...source[key], ...newProperty[key] };
+      } else {
+        source[key] = newProperty[key];
+      }
+    }
+    return source;
+  }
+
   //TODO: change this to get series() or get hcdata() and remove series from constructor
-  get series() {
-    if (!this.data) {
-      return [];
-    }
+  get hcSeries() {
+    let newSeries = {};
     this.#findDataType(this.yCols, this.valuesCol);
-    if (this.filters) {
-      this.filter(this.filters);
-    }
     let dataResult = undefined;
     if (this.dataType == "non-tidy") {
       dataResult = this.#nonTidyOperation(
@@ -322,18 +356,24 @@ class Series {
         this.xName
       );
     }
+    //add the series properties starting with data
+    newSeries = this.#addProperty("data", newSeries, dataResult);
     if (this.colors) {
-      for (const [key, value] of Object.entries(dataResult)) {
-        dataResult[key].color = this.colors[key];
-        //TODO: raise error if the data name doesnt have a corresponding color
-      }
+      newSeries = this.#addProperty("color", newSeries, this.colors);
     }
-    let newSeries = [];
-    for (let [key, value] of Object.entries(dataResult)) {
+    if (this.zIndex) {
+      newSeries = this.#addProperty("zIndex", newSeries, this.zIndex);
+    }
+    if (this.seriesTypes) {
+      newSeries = this.#addProperty("type", newSeries, this.seriesTypes);
+    }
+    //convert the series into a list, adding the keys as series names:
+    let seriesList = [];
+    for (let [key, value] of Object.entries(newSeries)) {
       value.name = key;
-      newSeries.push(value);
+      seriesList.push(value);
     }
-    return newSeries;
+    return seriesList;
   }
 }
 module.exports = Series;

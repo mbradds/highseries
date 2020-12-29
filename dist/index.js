@@ -1,5 +1,9 @@
 "use strict";
 
+function ownKeys(object, enumerableOnly) { var keys = Object.keys(object); if (Object.getOwnPropertySymbols) { var symbols = Object.getOwnPropertySymbols(object); if (enumerableOnly) symbols = symbols.filter(function (sym) { return Object.getOwnPropertyDescriptor(object, sym).enumerable; }); keys.push.apply(keys, symbols); } return keys; }
+
+function _objectSpread(target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i] != null ? arguments[i] : {}; if (i % 2) { ownKeys(Object(source), true).forEach(function (key) { _defineProperty(target, key, source[key]); }); } else if (Object.getOwnPropertyDescriptors) { Object.defineProperties(target, Object.getOwnPropertyDescriptors(source)); } else { ownKeys(Object(source)).forEach(function (key) { Object.defineProperty(target, key, Object.getOwnPropertyDescriptor(source, key)); }); } } return target; }
+
 function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
 function _slicedToArray(arr, i) { return _arrayWithHoles(arr) || _iterableToArrayLimit(arr, i) || _unsupportedIterableToArray(arr, i) || _nonIterableRest(); }
@@ -38,6 +42,8 @@ var _nonTidyOperation = _classPrivateFieldLooseKey("nonTidyOperation");
 
 var _tidyOperation = _classPrivateFieldLooseKey("tidyOperation");
 
+var _addProperty = _classPrivateFieldLooseKey("addProperty");
+
 var Series = /*#__PURE__*/function () {
   function Series(_ref) {
     var data = _ref.data,
@@ -49,6 +55,10 @@ var Series = /*#__PURE__*/function () {
         _yCols = _ref$yCols === void 0 ? undefined : _ref$yCols,
         _ref$colors = _ref.colors,
         colors = _ref$colors === void 0 ? undefined : _ref$colors,
+        _ref$zIndex = _ref.zIndex,
+        zIndex = _ref$zIndex === void 0 ? undefined : _ref$zIndex,
+        _ref$seriesTypes = _ref.seriesTypes,
+        seriesTypes = _ref$seriesTypes === void 0 ? undefined : _ref$seriesTypes,
         _ref$filters = _ref.filters,
         filters = _ref$filters === void 0 ? undefined : _ref$filters,
         _ref$transform = _ref.transform,
@@ -60,6 +70,9 @@ var Series = /*#__PURE__*/function () {
 
     _classCallCheck(this, Series);
 
+    Object.defineProperty(this, _addProperty, {
+      value: _addProperty2
+    });
     Object.defineProperty(this, _tidyOperation, {
       value: _tidyOperation2
     });
@@ -83,11 +96,12 @@ var Series = /*#__PURE__*/function () {
     this._xCol = _xCol;
     this._yCols = _yCols;
     this._colors = colors;
+    this._zIndex = zIndex;
+    this._seriesTypes = seriesTypes;
     this._filters = filters;
     this._transform = _transform;
     this._valuesCol = _valuesCol;
     this._xName = _xName;
-    this._series = [];
   }
 
   _createClass(Series, [{
@@ -112,6 +126,14 @@ var Series = /*#__PURE__*/function () {
 
       if (newParams.hasOwnProperty("yCols")) {
         this.yCols = newParams.yCols;
+      }
+
+      if (newParams.hasOwnProperty("colors")) {
+        this.colors = newParams.colors;
+      }
+
+      if (newParams.hasOwnProperty("zIndex")) {
+        this.zIndex = newParams.zIndex;
       }
 
       if (newParams.hasOwnProperty("filters")) {
@@ -230,6 +252,22 @@ var Series = /*#__PURE__*/function () {
       this._colors = newColors;
     }
   }, {
+    key: "zIndex",
+    get: function get() {
+      return this._zIndex;
+    },
+    set: function set(newZ) {
+      this._zIndex = newZ;
+    }
+  }, {
+    key: "seriesTypes",
+    get: function get() {
+      return this._seriesTypes;
+    },
+    set: function set(newTypes) {
+      this._seriesTypes = newTypes;
+    }
+  }, {
     key: "filters",
     get: function get() {
       return this._filters;
@@ -270,18 +308,12 @@ var Series = /*#__PURE__*/function () {
       this._dataType = newDataType;
     }
   }, {
-    key: "series",
+    key: "hcSeries",
     //TODO: change this to get series() or get hcdata() and remove series from constructor
     get: function get() {
-      if (!this.data) {
-        return [];
-      }
+      var newSeries = {};
 
       _classPrivateFieldLooseBase(this, _findDataType)[_findDataType](this.yCols, this.valuesCol);
-
-      if (this.filters) {
-        this.filter(this.filters);
-      }
 
       var dataResult = undefined;
 
@@ -289,33 +321,36 @@ var Series = /*#__PURE__*/function () {
         dataResult = _classPrivateFieldLooseBase(this, _nonTidyOperation)[_nonTidyOperation](this.xCol, this.yCols, this.transform, this.xName);
       } else {
         dataResult = _classPrivateFieldLooseBase(this, _tidyOperation)[_tidyOperation](this.xCol, this.yCols, this.transform, this.valuesCol, this.xName);
-      }
+      } //add the series properties starting with data
+
+
+      newSeries = _classPrivateFieldLooseBase(this, _addProperty)[_addProperty]("data", newSeries, dataResult);
 
       if (this.colors) {
-        for (var _i2 = 0, _Object$entries2 = Object.entries(dataResult); _i2 < _Object$entries2.length; _i2++) {
-          var _Object$entries2$_i = _slicedToArray(_Object$entries2[_i2], 2),
-              key = _Object$entries2$_i[0],
-              value = _Object$entries2$_i[1];
-
-          dataResult[key].color = this.colors[key]; //TODO: raise error if the data name doesnt have a corresponding color
-        }
+        newSeries = _classPrivateFieldLooseBase(this, _addProperty)[_addProperty]("color", newSeries, this.colors);
       }
 
-      var newSeries = [];
-
-      for (var _i3 = 0, _Object$entries3 = Object.entries(dataResult); _i3 < _Object$entries3.length; _i3++) {
-        var _Object$entries3$_i = _slicedToArray(_Object$entries3[_i3], 2),
-            _key = _Object$entries3$_i[0],
-            _value = _Object$entries3$_i[1];
-
-        _value.name = _key;
-        newSeries.push(_value);
+      if (this.zIndex) {
+        newSeries = _classPrivateFieldLooseBase(this, _addProperty)[_addProperty]("zIndex", newSeries, this.zIndex);
       }
 
-      return newSeries;
-    },
-    set: function set(newSeries) {
-      this._series = newSeries;
+      if (this.seriesTypes) {
+        newSeries = _classPrivateFieldLooseBase(this, _addProperty)[_addProperty]("type", newSeries, this.seriesTypes);
+      } //convert the series into a list, adding the keys as series names:
+
+
+      var seriesList = [];
+
+      for (var _i2 = 0, _Object$entries2 = Object.entries(newSeries); _i2 < _Object$entries2.length; _i2++) {
+        var _Object$entries2$_i = _slicedToArray(_Object$entries2[_i2], 2),
+            key = _Object$entries2$_i[0],
+            value = _Object$entries2$_i[1];
+
+        value.name = key;
+        seriesList.push(value);
+      }
+
+      return seriesList;
     }
   }]);
 
@@ -413,12 +448,14 @@ var _yValues2 = function _yValues2(transform) {
 var _nonTidyOperation2 = function _nonTidyOperation2(xCol, yCols, transform, xName) {
   var _this2 = this;
 
+  if (this.filters) {
+    this.filter(this.filters);
+  }
+
   var seriesData = {};
   var colTotals = {};
   yCols.map(function (col) {
-    seriesData[col] = {
-      data: []
-    };
+    seriesData[col] = [];
     colTotals[col] = 0;
   });
 
@@ -428,9 +465,9 @@ var _nonTidyOperation2 = function _nonTidyOperation2(xCol, yCols, transform, xNa
 
   this.data.map(function (row) {
     yCols.map(function (col) {
-      var _seriesData$col$data$;
+      var _seriesData$col$push;
 
-      seriesData[col].data.push((_seriesData$col$data$ = {}, _defineProperty(_seriesData$col$data$, _this2.xName, row[xCol]), _defineProperty(_seriesData$col$data$, "y", yOperator(row, col)), _seriesData$col$data$));
+      seriesData[col].push((_seriesData$col$push = {}, _defineProperty(_seriesData$col$push, _this2.xName, row[xCol]), _defineProperty(_seriesData$col$push, "y", yOperator(row, col)), _seriesData$col$push));
       colTotals[col] = colTotals[col] + row[col];
     });
   });
@@ -439,6 +476,10 @@ var _nonTidyOperation2 = function _nonTidyOperation2(xCol, yCols, transform, xNa
 
 var _tidyOperation2 = function _tidyOperation2(xCol, yCols, transform, valuesCol, xName) {
   var _this3 = this;
+
+  if (this.filters) {
+    this.filter(this.filters);
+  }
 
   var variableColumn = _classPrivateFieldLooseBase(this, _getUnique)[_getUnique](yCols);
 
@@ -457,11 +498,35 @@ var _tidyOperation2 = function _tidyOperation2(xCol, yCols, transform, valuesCol
 
       return _ref2 = {}, _defineProperty(_ref2, _this3.xName, r[xCol]), _defineProperty(_ref2, "y", yOperator(r, valuesCol)), _ref2;
     });
-    dataResult[v] = {
-      data: hcData
-    };
+    dataResult[v] = hcData;
   });
   return dataResult;
+};
+
+var _addProperty2 = function _addProperty2(propertyName, source, target) {
+  var newProperty = {};
+
+  for (var _i3 = 0, _Object$entries3 = Object.entries(target); _i3 < _Object$entries3.length; _i3++) {
+    var _Object$entries3$_i = _slicedToArray(_Object$entries3[_i3], 2),
+        key = _Object$entries3$_i[0],
+        value = _Object$entries3$_i[1];
+
+    newProperty[key] = _defineProperty({}, propertyName, value);
+  }
+
+  for (var _i4 = 0, _Object$entries4 = Object.entries(newProperty); _i4 < _Object$entries4.length; _i4++) {
+    var _Object$entries4$_i = _slicedToArray(_Object$entries4[_i4], 2),
+        _key = _Object$entries4$_i[0],
+        _value = _Object$entries4$_i[1];
+
+    if (source.hasOwnProperty(_key)) {
+      source[_key] = _objectSpread(_objectSpread({}, source[_key]), newProperty[_key]);
+    } else {
+      source[_key] = newProperty[_key];
+    }
+  }
+
+  return source;
 };
 
 module.exports = Series;
