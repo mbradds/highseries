@@ -1,15 +1,35 @@
 class Series {
+  /**
+   *
+   * @param {Object} param0
+   * @param {JSON} param0.data - User JSON data for chart.
+   * @param {String} param0.chartType
+   * @param {String} param0.xCol
+   * @param {String|Array} param0.yCols
+   * @param {String} param0.valuesCol
+   * @param {Object} param0.colors
+   * @param {Object} param0.zIndex
+   * @param {Object} param0.seriesTypes
+   * @param {Object} param0.yAxis
+   * @param {Object} param0.filters
+   * @param {Object} param0.transform
+   * @param {String} param0.xName
+   */
   constructor({
     data,
-    chartType = undefined,
-    xCol = undefined,
-    yCols = undefined,
-    colors = undefined,
-    zIndex = undefined,
-    seriesTypes = undefined,
-    filters = undefined,
-    transform = undefined,
-    valuesCol = undefined,
+    chartType,
+    xCol,
+    yCols,
+    colors,
+    zIndex,
+    seriesTypes,
+    yAxis,
+    filters,
+    transform = {
+      decimals: undefined,
+      conv: undefined,
+    },
+    valuesCol,
     xName = "x",
   }) {
     this._data = data;
@@ -19,6 +39,7 @@ class Series {
     this._colors = colors;
     this._zIndex = zIndex;
     this._seriesTypes = seriesTypes;
+    this._yAxis = yAxis;
     this._filters = filters;
     this._transform = transform;
     this._valuesCol = valuesCol;
@@ -81,6 +102,14 @@ class Series {
     this._seriesTypes = newTypes;
   }
 
+  get yAxis() {
+    return this._yAxis;
+  }
+
+  set yAxis(newyAxis) {
+    this._yAxis = newyAxis;
+  }
+
   get filters() {
     return this._filters;
   }
@@ -93,8 +122,13 @@ class Series {
     return this._transform;
   }
 
-  set transform(newtransform) {
-    this._transform = newtransform;
+  set transform(newTransform) {
+    if (newTransform.hasOwnProperty("decimals")) {
+      this._transform.decimals = newTransform.decimals;
+    }
+    if (newTransform.hasOwnProperty("conv")) {
+      this._transform.conv = newTransform.conv;
+    }
   }
 
   get valuesCol() {
@@ -224,51 +258,45 @@ class Series {
   }
 
   #yValues(transform) {
-    if (!transform) {
+    if (!transform.decimals && !transform.conv) {
       return (r, c) => r[c];
-    } else if (
-      transform &&
-      transform.hasOwnProperty("decimals") &&
-      !transform.hasOwnProperty("operator")
-    ) {
+    } else if (transform.decimals && !transform.conv) {
       return (r, c) =>
         r[c] !== null ? +r[c].toFixed(transform.decimals) : r[c];
-    } else if (transform && transform.hasOwnProperty("operator")) {
-      if (transform.hasOwnProperty("decimals")) {
-        if (transform.operator == "*") {
+    } else if (transform.conv) {
+      let conversion = transform.conv[0];
+      let operator = transform.conv[1];
+      if (transform.decimals) {
+        if (operator == "*") {
           return (r, c) =>
             r[c] !== null
-              ? +(r[c] * transform.conversion).toFixed(transform.decimals)
+              ? +(r[c] * conversion).toFixed(transform.decimals)
               : r[c];
-        } else if (transform.operator == "/") {
+        } else if (operator == "/") {
           return (r, c) =>
             r[c] !== null
-              ? +(r[c] / transform.conversion).toFixed(transform.decimals)
+              ? +(r[c] / conversion).toFixed(transform.decimals)
               : r[c];
-        } else if (transform.conversion == "+") {
+        } else if (operator == "+") {
           return (r, c) =>
             r[c] !== null
-              ? +(r[c] + transform.conversion).toFixed(transform.decimals)
+              ? +(r[c] + conversion).toFixed(transform.decimals)
               : r[c];
-        } else if (transform.conversion == "-") {
+        } else if (conversion == "-") {
           return (r, c) =>
             r[c] !== null
-              ? +(r[c] - transform.conversion).toFixed(transform.decimals)
+              ? +(r[c] - conversion).toFixed(transform.decimals)
               : r[c];
         }
       } else {
-        if (transform.operator == "*") {
-          return (r, c) =>
-            r[c] !== null ? +(r[c] * transform.conversion) : r[c];
-        } else if (transform.operator == "/") {
-          return (r, c) =>
-            r[c] !== null ? +(r[c] / transform.conversion) : r[c];
-        } else if (transform.conversion == "+") {
-          return (r, c) =>
-            r[c] !== null ? +(r[c] + transform.conversion) : r[c];
-        } else if (transform.conversion == "-") {
-          return (r, c) =>
-            r[c] !== null ? +(r[c] - transform.conversion) : r[c];
+        if (operator == "*") {
+          return (r, c) => (r[c] !== null ? +(r[c] * conversion) : r[c]);
+        } else if (operator == "/") {
+          return (r, c) => (r[c] !== null ? +(r[c] / conversion) : r[c]);
+        } else if (conversion == "+") {
+          return (r, c) => (r[c] !== null ? +(r[c] + conversion) : r[c]);
+        } else if (conversion == "-") {
+          return (r, c) => (r[c] !== null ? +(r[c] - conversion) : r[c]);
         }
       }
     }
@@ -366,6 +394,9 @@ class Series {
     }
     if (this.seriesTypes) {
       newSeries = this.#addProperty("type", newSeries, this.seriesTypes);
+    }
+    if (this.yAxis) {
+      newSeries = this.#addProperty("yAxis", newSeries, this.yAxis);
     }
     //convert the series into a list, adding the keys as series names:
     let seriesList = [];

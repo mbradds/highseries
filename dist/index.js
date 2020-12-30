@@ -45,26 +45,38 @@ var _tidyOperation = _classPrivateFieldLooseKey("tidyOperation");
 var _addProperty = _classPrivateFieldLooseKey("addProperty");
 
 var Series = /*#__PURE__*/function () {
+  /**
+   *
+   * @param {Object} param0
+   * @param {JSON} param0.data - User JSON data for chart.
+   * @param {String} param0.chartType
+   * @param {String} param0.xCol
+   * @param {String|Array} param0.yCols
+   * @param {String} param0.valuesCol
+   * @param {Object} param0.colors
+   * @param {Object} param0.zIndex
+   * @param {Object} param0.seriesTypes
+   * @param {Object} param0.yAxis
+   * @param {Object} param0.filters
+   * @param {Object} param0.transform
+   * @param {String} param0.xName
+   */
   function Series(_ref) {
     var data = _ref.data,
-        _ref$chartType = _ref.chartType,
-        chartType = _ref$chartType === void 0 ? undefined : _ref$chartType,
-        _ref$xCol = _ref.xCol,
-        _xCol = _ref$xCol === void 0 ? undefined : _ref$xCol,
-        _ref$yCols = _ref.yCols,
-        _yCols = _ref$yCols === void 0 ? undefined : _ref$yCols,
-        _ref$colors = _ref.colors,
-        colors = _ref$colors === void 0 ? undefined : _ref$colors,
-        _ref$zIndex = _ref.zIndex,
-        zIndex = _ref$zIndex === void 0 ? undefined : _ref$zIndex,
-        _ref$seriesTypes = _ref.seriesTypes,
-        seriesTypes = _ref$seriesTypes === void 0 ? undefined : _ref$seriesTypes,
-        _ref$filters = _ref.filters,
-        filters = _ref$filters === void 0 ? undefined : _ref$filters,
+        chartType = _ref.chartType,
+        _xCol = _ref.xCol,
+        _yCols = _ref.yCols,
+        colors = _ref.colors,
+        zIndex = _ref.zIndex,
+        seriesTypes = _ref.seriesTypes,
+        yAxis = _ref.yAxis,
+        filters = _ref.filters,
         _ref$transform = _ref.transform,
-        _transform = _ref$transform === void 0 ? undefined : _ref$transform,
-        _ref$valuesCol = _ref.valuesCol,
-        _valuesCol = _ref$valuesCol === void 0 ? undefined : _ref$valuesCol,
+        _transform = _ref$transform === void 0 ? {
+      decimals: undefined,
+      conv: undefined
+    } : _ref$transform,
+        _valuesCol = _ref.valuesCol,
         _ref$xName = _ref.xName,
         _xName = _ref$xName === void 0 ? "x" : _ref$xName;
 
@@ -98,6 +110,7 @@ var Series = /*#__PURE__*/function () {
     this._colors = colors;
     this._zIndex = zIndex;
     this._seriesTypes = seriesTypes;
+    this._yAxis = yAxis;
     this._filters = filters;
     this._transform = _transform;
     this._valuesCol = _valuesCol;
@@ -268,6 +281,14 @@ var Series = /*#__PURE__*/function () {
       this._seriesTypes = newTypes;
     }
   }, {
+    key: "yAxis",
+    get: function get() {
+      return this._yAxis;
+    },
+    set: function set(newyAxis) {
+      this._yAxis = newyAxis;
+    }
+  }, {
     key: "filters",
     get: function get() {
       return this._filters;
@@ -280,8 +301,14 @@ var Series = /*#__PURE__*/function () {
     get: function get() {
       return this._transform;
     },
-    set: function set(newtransform) {
-      this._transform = newtransform;
+    set: function set(newTransform) {
+      if (newTransform.hasOwnProperty("decimals")) {
+        this._transform.decimals = newTransform.decimals;
+      }
+
+      if (newTransform.hasOwnProperty("conv")) {
+        this._transform.conv = newTransform.conv;
+      }
     }
   }, {
     key: "valuesCol",
@@ -336,6 +363,10 @@ var Series = /*#__PURE__*/function () {
 
       if (this.seriesTypes) {
         newSeries = _classPrivateFieldLooseBase(this, _addProperty)[_addProperty]("type", newSeries, this.seriesTypes);
+      }
+
+      if (this.yAxis) {
+        newSeries = _classPrivateFieldLooseBase(this, _addProperty)[_addProperty]("yAxis", newSeries, this.yAxis);
       } //convert the series into a list, adding the keys as series names:
 
 
@@ -396,49 +427,52 @@ var _properxName2 = function _properxName2(xName) {
 };
 
 var _yValues2 = function _yValues2(transform) {
-  if (!transform) {
+  if (!transform.decimals && !transform.conv) {
     return function (r, c) {
       return r[c];
     };
-  } else if (transform && transform.hasOwnProperty("decimals") && !transform.hasOwnProperty("operator")) {
+  } else if (transform.decimals && !transform.conv) {
     return function (r, c) {
       return r[c] !== null ? +r[c].toFixed(transform.decimals) : r[c];
     };
-  } else if (transform && transform.hasOwnProperty("operator")) {
-    if (transform.hasOwnProperty("decimals")) {
-      if (transform.operator == "*") {
+  } else if (transform.conv) {
+    var conversion = transform.conv[0];
+    var operator = transform.conv[1];
+
+    if (transform.decimals) {
+      if (operator == "*") {
         return function (r, c) {
-          return r[c] !== null ? +(r[c] * transform.conversion).toFixed(transform.decimals) : r[c];
+          return r[c] !== null ? +(r[c] * conversion).toFixed(transform.decimals) : r[c];
         };
-      } else if (transform.operator == "/") {
+      } else if (operator == "/") {
         return function (r, c) {
-          return r[c] !== null ? +(r[c] / transform.conversion).toFixed(transform.decimals) : r[c];
+          return r[c] !== null ? +(r[c] / conversion).toFixed(transform.decimals) : r[c];
         };
-      } else if (transform.conversion == "+") {
+      } else if (operator == "+") {
         return function (r, c) {
-          return r[c] !== null ? +(r[c] + transform.conversion).toFixed(transform.decimals) : r[c];
+          return r[c] !== null ? +(r[c] + conversion).toFixed(transform.decimals) : r[c];
         };
-      } else if (transform.conversion == "-") {
+      } else if (conversion == "-") {
         return function (r, c) {
-          return r[c] !== null ? +(r[c] - transform.conversion).toFixed(transform.decimals) : r[c];
+          return r[c] !== null ? +(r[c] - conversion).toFixed(transform.decimals) : r[c];
         };
       }
     } else {
-      if (transform.operator == "*") {
+      if (operator == "*") {
         return function (r, c) {
-          return r[c] !== null ? +(r[c] * transform.conversion) : r[c];
+          return r[c] !== null ? +(r[c] * conversion) : r[c];
         };
-      } else if (transform.operator == "/") {
+      } else if (operator == "/") {
         return function (r, c) {
-          return r[c] !== null ? +(r[c] / transform.conversion) : r[c];
+          return r[c] !== null ? +(r[c] / conversion) : r[c];
         };
-      } else if (transform.conversion == "+") {
+      } else if (conversion == "+") {
         return function (r, c) {
-          return r[c] !== null ? +(r[c] + transform.conversion) : r[c];
+          return r[c] !== null ? +(r[c] + conversion) : r[c];
         };
-      } else if (transform.conversion == "-") {
+      } else if (conversion == "-") {
         return function (r, c) {
-          return r[c] !== null ? +(r[c] - transform.conversion) : r[c];
+          return r[c] !== null ? +(r[c] - conversion) : r[c];
         };
       }
     }

@@ -3,9 +3,8 @@ const tidy = require("./test_data/tidy.json");
 const Series = require("../src/series-shaper.js");
 
 const transform = {
-  conversion: 6.2898,
-  operator: "*",
   decimals: 2,
+  conv: [6.2898, "*"],
 };
 
 const filters = { Product: "Propane", Origin: "Canada" };
@@ -23,27 +22,34 @@ const zIndex = {
   Truck: 1,
 };
 
-const seriesTidy = new Series({
-  data: tidy,
-  chartType: "line",
-  colors: colors,
-  zIndex: zIndex,
-});
-seriesTidy.update({
-  xCol: "Period",
-  yCols: "Mode of Transportation",
-  valuesCol: "Volume (Mb/d)",
-  filters: filters,
-  //transform: transform,
-});
-//console.log(seriesTidy.hcSeries[0]);
+// const seriesTidy = new Series({
+//   data: tidy,
+//   chartType: "line",
+//   colors: colors,
+//   zIndex: zIndex,
+// });
+// seriesTidy.update({
+//   xCol: "Period",
+//   yCols: "Mode of Transportation",
+//   valuesCol: "Volume (Mb/d)",
+//   filters: filters,
+//   transform: transform,
+// });
+// console.log(seriesTidy.hcSeries[0]);
 
 const seriesNonTidy = new Series({
   data: nonTidy,
   chartType: "line",
   colors: colors,
+  transform: { decimals: 1 },
+});
+seriesNonTidy.update({
+  data: nonTidy,
+  transform: transform,
 });
 seriesNonTidy.xCol = "Period";
 seriesNonTidy.yCols = ["Marine", "Pipeline", "Railway", "Truck"];
 seriesNonTidy.filters = filters;
-console.log(seriesNonTidy.hcSeries[0]);
+//console.log(seriesNonTidy);
+
+let newSeries = new Series();
