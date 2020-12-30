@@ -3,7 +3,6 @@ class Series {
    *
    * @param {Object} param0
    * @param {JSON} param0.data - User JSON data for chart.
-   * @param {String} param0.chartType
    * @param {String} param0.xCol
    * @param {String|Array} param0.yCols
    * @param {String} param0.valuesCol
@@ -17,7 +16,6 @@ class Series {
    */
   constructor({
     data,
-    chartType,
     xCol,
     yCols,
     colors,
@@ -33,7 +31,6 @@ class Series {
     xName = "x",
   }) {
     this._data = data;
-    this._chartType = chartType;
     this._xCol = xCol;
     this._yCols = yCols;
     this._colors = colors;
@@ -52,14 +49,6 @@ class Series {
 
   set data(newData) {
     this._data = newData;
-  }
-
-  get chartType() {
-    return this._chartType;
-  }
-
-  set chartType(chartType) {
-    this._chartType = chartType;
   }
 
   get xCol() {
@@ -214,13 +203,11 @@ class Series {
    * @param {*} how Enter either "asc" (ascending order) or "desc" (descending order). Default is "asc"
    */
   sort(by, how = "asc") {
-    let sortedData = [];
     if (how == "asc") {
-      sortedData = this.data.slice().sort((a, b) => b[by] - a[by]);
+      this.data = this.data.slice().sort((a, b) => b[by] - a[by]);
     } else if (how == "desc") {
-      sortedData = this.data.slice().sort((a, b) => a[by] - b[by]);
+      this.data = this.data.slice().sort((a, b) => a[by] - b[by]);
     }
-    this.data = sortedData;
     return this.data;
   }
 

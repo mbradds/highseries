@@ -30,7 +30,8 @@ def process_data():
                                columns='Mode of Transportation').reset_index()
 
     
-    df_nonTidy = df_nonTidy.sort_values(by=['Period','Product','Origin'])
+    df_nonTidy = df_nonTidy.sort_values(by=['Period','Origin','Product'])
+    df = df.sort_values(by=['Period','Origin','Mode of Transportation','Product'])
     saveJson(df_nonTidy, 'non-tidy.json')
     saveJson(df,'tidy.json')
     return df_nonTidy,df
@@ -38,4 +39,3 @@ def process_data():
     
 if __name__ == "__main__":
     nonTidy,tidy = process_data()
-    print(list(set(nonTidy['Origin'])))

@@ -49,7 +49,6 @@ var Series = /*#__PURE__*/function () {
    *
    * @param {Object} param0
    * @param {JSON} param0.data - User JSON data for chart.
-   * @param {String} param0.chartType
    * @param {String} param0.xCol
    * @param {String|Array} param0.yCols
    * @param {String} param0.valuesCol
@@ -63,7 +62,6 @@ var Series = /*#__PURE__*/function () {
    */
   function Series(_ref) {
     var data = _ref.data,
-        chartType = _ref.chartType,
         _xCol = _ref.xCol,
         _yCols = _ref.yCols,
         colors = _ref.colors,
@@ -104,7 +102,6 @@ var Series = /*#__PURE__*/function () {
       value: _findDataType2
     });
     this._data = data;
-    this._chartType = chartType;
     this._xCol = _xCol;
     this._yCols = _yCols;
     this._colors = colors;
@@ -209,19 +206,17 @@ var Series = /*#__PURE__*/function () {
     key: "sort",
     value: function sort(by) {
       var how = arguments.length > 1 && arguments[1] !== undefined ? arguments[1] : "asc";
-      var sortedData = [];
 
       if (how == "asc") {
-        sortedData = this.data.slice().sort(function (a, b) {
+        this.data = this.data.slice().sort(function (a, b) {
           return b[by] - a[by];
         });
       } else if (how == "desc") {
-        sortedData = this.data.slice().sort(function (a, b) {
+        this.data = this.data.slice().sort(function (a, b) {
           return a[by] - b[by];
         });
       }
 
-      this.data = sortedData;
       return this.data;
     }
   }, {
@@ -231,14 +226,6 @@ var Series = /*#__PURE__*/function () {
     },
     set: function set(newData) {
       this._data = newData;
-    }
-  }, {
-    key: "chartType",
-    get: function get() {
-      return this._chartType;
-    },
-    set: function set(chartType) {
-      this._chartType = chartType;
     }
   }, {
     key: "xCol",

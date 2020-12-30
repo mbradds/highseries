@@ -24,7 +24,6 @@ const zIndex = {
 
 // const seriesTidy = new Series({
 //   data: tidy,
-//   chartType: "line",
 //   colors: colors,
 //   zIndex: zIndex,
 // });
@@ -39,7 +38,6 @@ const zIndex = {
 
 const seriesNonTidy = new Series({
   data: nonTidy,
-  chartType: "line",
   colors: colors,
   transform: { decimals: 1 },
 });
@@ -50,6 +48,4 @@ seriesNonTidy.update({
 seriesNonTidy.xCol = "Period";
 seriesNonTidy.yCols = ["Marine", "Pipeline", "Railway", "Truck"];
 seriesNonTidy.filters = filters;
-//console.log(seriesNonTidy);
-
-let newSeries = new Series();
+console.log(seriesNonTidy);
