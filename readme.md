@@ -1,4 +1,4 @@
-# highseries
+# highseries [![NPM Package](https://img.shields.io/npm/v/highseries)](https://www.npmjs.com/package/highseries)
 
 A data-prep tool for shaping datasets for visualization with Highcharts.
 
@@ -8,11 +8,11 @@ A data-prep tool for shaping datasets for visualization with Highcharts.
 
 ## Intro
 
-The Highcharts JavaScript api requires that the users data conform to a "series" object, consiting
+The Highcharts JavaScript api requires that the user data conform to a "series" object, consiting
 of at least a series name, and an array of "data" in a JSON style format of {x:value, y:value} pairs for continuous data,
 or {name:value, y:value} pairs for categorical data.
 
-Obviously most datasets found online dont conform to this required format. Highseries reads in a users data,
+Obviously most datasets found online dont conform to this required format. Highseries reads in a users JSON data,
 as well as several optional parameters for syling each series, and converts the dataset directly into
 an Array of valid series objects that Highcharts can work with.
 
@@ -57,7 +57,7 @@ These examples go over using highseries on a real world dataset of monthly NGL e
 
 - **Data Source:** https://open.canada.ca/data/en/dataset/8cb1d0d0-6ea7-4f6d-b01d-a38fafdcce77
 
-### Tidy data example
+### Tidy data example (one column with numeric data)
 
 | Period     | Product | Origin | Mode of Transportation | Volume (Mb/d) |
 | :--------- | :-----: | -----: | ---------------------: | ------------: |
@@ -79,9 +79,10 @@ const colors = {
 let tidySeries = new Series({
   data: tidyData,
   xCol: "Period",
-  yCols: "Mode of Transportation",
+  yCols: "Mode of Transportation", //the unique values in this column will have their own series
   valuesCol: "Volume (Mb/d)",
   filters: { Product: "Propane", Origin: "Canada" },
+  colors: colors,
 });
 
 let forHighcharts = tidySeries.hcSeries;
@@ -92,7 +93,7 @@ Highcharts.chart("container", {
 });
 ```
 
-### Non-tidy data example
+### Non-tidy data example (multiple columns with numeric data)
 
 | Period     | Product | Origin | Marine | Pipeline | Railway | Truck |
 | :--------- | :-----: | -----: | -----: | -------: | ------- | ----- |
@@ -114,8 +115,9 @@ const colors = {
 let nonTidySeries = new Series({
   data: nonTidyData,
   xCol: "Period",
-  yCols: ["Marine", "Pipeline", "Railway", "Truck"],
+  yCols: ["Marine", "Pipeline", "Railway", "Truck"], //these columns will have their own series
   filters: { Product: "Propane", Origin: "Canada" },
+  colors: colors,
 });
 
 let forHighcharts = nonTidySeries.hcSeries;
@@ -126,16 +128,16 @@ Highcharts.chart("container", {
 });
 ```
 
-### Update data/Series options (using Non-tidy example)
+### Update data/Series options (using non-tidy example)
 
-The update method can be used to modify the data, keeping some of the original options, such as color.
+The update method can be used to modify the data, keeping some of the original options, such as series colors.
 This update example can be used to convert the chart to Alberta Butane exports (m3/d) from Canada Propane exports (Mb/d).
 
 ```javascript
 nonTidySeries.update({
   data: nonTidyData,
   filters: { Product: "Butane", Region: "Alberta" },
-  transform: { conv: [159, "*"], decimals: 2 }, //multiply the data values by 159 to convert Mb/d to m3/d
+  transform: { conv: [159, "*"], decimals: 2 }, //multiply values by 159 to convert Mb/d to m3/d
 });
 
 let forHighcharts = nonTidySeries.hcSeries;
@@ -145,3 +147,12 @@ Highcharts.chart("container", {
   series: forHighcharts,
 });
 ```
+
+## Notes
+
+highseries runs on the client. Here are some tips for optimal performance.
+
+- User data should be sorted beforehand. Highseries has a sort() method, but this should be avoided if possible.
+- Non-tidy data usually has a smaller file size compared to the same data in tidy format.
+- Only include data columns that are critical for the viz.
+- Only include data rows that are critical for the viz. Highseries has a filter parameter, which is useful when paired with a HTML dropdown. Only include data "slices" that will be used in the viz.
