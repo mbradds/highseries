@@ -1,4 +1,6 @@
-example
+examples
 .vscode
 node_modules
 index.html
+*.png
+src

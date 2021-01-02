@@ -4,7 +4,8 @@ module.exports = {
   mode: "production",
   target: "es5",
   entry: {
-    testCharts: "./index-pages.js",
+    testCharts: "./github-pages-example/index.js",
+    readmeCharts: "./readme-example/index.js",
   },
   output: {
     path: path.resolve(__dirname, "dist"),

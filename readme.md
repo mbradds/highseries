@@ -1,4 +1,4 @@
-# highseries [![NPM Package](https://img.shields.io/npm/v/highseries)](https://www.npmjs.com/package/highseries)
+# Highseries [![NPM Package](https://img.shields.io/npm/v/highseries)](https://www.npmjs.com/package/highseries)
 
 A data-prep tool for shaping datasets for visualization with Highcharts.
 
@@ -6,7 +6,13 @@ A data-prep tool for shaping datasets for visualization with Highcharts.
 - **Live Example:** https://mbradds.github.io/highseries/
 - **Source:** https://github.com/mbradds/highseries
 
-## Intro
+## Installation
+
+```bash
+npm i highseries
+```
+
+## Introduction
 
 The Highcharts JavaScript api requires that the user data conform to a "series" object, consiting
 of at least a series name, and an array of "data" in a JSON style format of {x:value, y:value} pairs for continuous data,
@@ -18,12 +24,6 @@ an Array of valid series objects that Highcharts can work with.
 
 Highseries aims to be dataset structure agnostic, in that the input data can be tidy, non-tidy,
 and contain any kind of column names, stacking, etc.
-
-## Installation
-
-```bash
-npm i highseries
-```
 
 ## Basic usage
 
@@ -53,7 +53,7 @@ Highcharts.chart("container", {
 
 ## Examples
 
-These examples go over using highseries on a real world dataset of monthly NGL exports from Canada.
+These examples go over using Highseries on a real world dataset of monthly NGL exports from Canada.
 
 - **Data Source:** https://open.canada.ca/data/en/dataset/8cb1d0d0-6ea7-4f6d-b01d-a38fafdcce77
 
@@ -73,7 +73,7 @@ const colors = {
   Marine: "Red",
   Pipeline: "Blue",
   Railway: "Green",
-  Truck: "Yellow",
+  Truck: "Orange",
 };
 
 let tidySeries = new Series({
@@ -93,6 +93,8 @@ Highcharts.chart("container", {
 });
 ```
 
+![plot](./canada-propane-exports-tidy.png)
+
 ### Non-tidy data example (multiple columns with numeric data)
 
 | Period     | Product | Origin | Marine | Pipeline | Railway | Truck |
@@ -109,7 +111,7 @@ const colors = {
   Marine: "Red",
   Pipeline: "Blue",
   Railway: "Green",
-  Truck: "Yellow",
+  Truck: "Orange",
 };
 
 let nonTidySeries = new Series({
@@ -128,29 +130,33 @@ Highcharts.chart("container", {
 });
 ```
 
+![plot](./canada-propane-exports-nonTidy.png)
+
 ### Update data/Series options (using non-tidy example)
 
 The update method can be used to modify the data, keeping some of the original options, such as series colors.
-This update example can be used to convert the chart to Alberta Butane exports (m3/d) from Canada Propane exports (Mb/d).
+This update example converts the chart from Canada Propane exports (Mb/d) to Alberta Butane exports (m3/d).
 
 ```javascript
+//continuation from previous non-tidy example
 nonTidySeries.update({
   data: nonTidyData,
-  filters: { Product: "Butane", Region: "Alberta" },
+  filters: { Product: "Butane", Origin: "Alberta" },
   transform: { conv: [159, "*"], decimals: 2 }, //multiply values by 159 to convert Mb/d to m3/d
 });
 
-let forHighcharts = nonTidySeries.hcSeries;
+forHighcharts = nonTidySeries.hcSeries;
 // Generate the chart
 Highcharts.chart("container", {
   // options - see https://api.highcharts.com/highcharts
   series: forHighcharts,
 });
 ```
+![plot](./alberta-butane-exports.png)
 
 ## Notes
 
-highseries runs on the client. Here are some tips for optimal performance.
+Highseries runs on the client. Here are some tips for optimal performance.
 
 - User data should be sorted beforehand. Highseries has a sort() method, but this should be avoided if possible.
 - Non-tidy data usually has a smaller file size compared to the same data in tidy format.
