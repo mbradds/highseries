@@ -93,7 +93,7 @@ Highcharts.chart("container", {
 });
 ```
 
-![plot](./canada-propane-exports-tidy.png)
+![plot](./examples/images/canada-propane-exports-tidy.png)
 
 ### Non-tidy data example (multiple columns with numeric data)
 
@@ -130,7 +130,7 @@ Highcharts.chart("container", {
 });
 ```
 
-![plot](./canada-propane-exports-nonTidy.png)
+![plot](./examples/images/canada-propane-exports-nonTidy.png)
 
 ### Update data/Series options (using non-tidy example)
 
@@ -152,7 +152,7 @@ Highcharts.chart("container", {
   series: forHighcharts,
 });
 ```
-![plot](./alberta-butane-exports.png)
+![plot](./examples/images/alberta-butane-exports.png)
 
 ## Notes
 
