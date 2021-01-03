@@ -1,6 +1,6 @@
 {
   "name": "highseries",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "A tool for converting structure agnostic spreadsheet style data into Highcharts consumable data on the fly.",
   "main": "dist/index.js",
   "directories": {

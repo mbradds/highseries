@@ -14,13 +14,13 @@ npm i highseries
 
 ## Introduction
 
-The Highcharts JavaScript api requires that the user data conform to a "series" object, consiting
-of at least a series name, and an array of "data" in a JSON style format of {x:value, y:value} pairs for continuous data,
+The Highcharts JavaScript api requires that the users data conform to a *series* array of objects, with each series element containing
+at least a *name* property, and a *data* property. The *data* property is typically a JSON style object of {x:value, y:value} pairs for continuous data,
 or {name:value, y:value} pairs for categorical data.
 
 Obviously most datasets found online dont conform to this required format. Highseries reads in a users JSON data,
-as well as several optional parameters for syling each series, and converts the dataset directly into
-an Array of valid series objects that Highcharts can work with.
+as well as several optional parameters for syling/shaping each *series*, and converts the dataset directly into
+a js array of valid *series* objects that Highcharts can work with.
 
 Highseries aims to be dataset structure agnostic, in that the input data can be tidy, non-tidy,
 and contain any kind of column names, stacking, etc.
@@ -36,14 +36,14 @@ const data = [
   { Date: "January 2, 2021", valuesCol1: 200, valuesCol2: 100 },
 ];
 
-let tidySeries = new Series({
+let series = new Series({
   data: data,
   xCol: "Date",
   yCols: ["valuesCol1", "valuesCol2"],
 });
 
 //generate the series that will be passed into Highcharts
-let forHighcharts = tidySeries.hcSeries;
+let forHighcharts = series.hcSeries;
 // Generate the chart
 Highcharts.chart("container", {
   // options - see https://api.highcharts.com/highcharts
