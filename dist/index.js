@@ -24,21 +24,25 @@ function _defineProperties(target, props) { for (var i = 0; i < props.length; i+
 
 function _createClass(Constructor, protoProps, staticProps) { if (protoProps) _defineProperties(Constructor.prototype, protoProps); if (staticProps) _defineProperties(Constructor, staticProps); return Constructor; }
 
-function _classPrivateMethodGet(receiver, privateSet, fn) { if (!privateSet.has(receiver)) { throw new TypeError("attempted to get private field on non-instance"); } return fn; }
+function _classPrivateFieldLooseBase(receiver, privateKey) { if (!Object.prototype.hasOwnProperty.call(receiver, privateKey)) { throw new TypeError("attempted to use private field on non-instance"); } return receiver; }
 
-var _findDataType = /*#__PURE__*/new WeakSet();
+var id = 0;
 
-var _getUnique = /*#__PURE__*/new WeakSet();
+function _classPrivateFieldLooseKey(name) { return "__private_" + id++ + "_" + name; }
 
-var _properxName = /*#__PURE__*/new WeakSet();
+var _findDataType = /*#__PURE__*/_classPrivateFieldLooseKey("findDataType");
 
-var _yValues = /*#__PURE__*/new WeakSet();
+var _getUnique = /*#__PURE__*/_classPrivateFieldLooseKey("getUnique");
 
-var _nonTidyOperation = /*#__PURE__*/new WeakSet();
+var _properxName = /*#__PURE__*/_classPrivateFieldLooseKey("properxName");
 
-var _tidyOperation = /*#__PURE__*/new WeakSet();
+var _yValues = /*#__PURE__*/_classPrivateFieldLooseKey("yValues");
 
-var _addProperty = /*#__PURE__*/new WeakSet();
+var _nonTidyOperation = /*#__PURE__*/_classPrivateFieldLooseKey("nonTidyOperation");
+
+var _tidyOperation = /*#__PURE__*/_classPrivateFieldLooseKey("tidyOperation");
+
+var _addProperty = /*#__PURE__*/_classPrivateFieldLooseKey("addProperty");
 
 var Series = /*#__PURE__*/function () {
   /**
@@ -78,20 +82,27 @@ var Series = /*#__PURE__*/function () {
 
     _classCallCheck(this, Series);
 
-    _addProperty.add(this);
-
-    _tidyOperation.add(this);
-
-    _nonTidyOperation.add(this);
-
-    _yValues.add(this);
-
-    _properxName.add(this);
-
-    _getUnique.add(this);
-
-    _findDataType.add(this);
-
+    Object.defineProperty(this, _addProperty, {
+      value: _addProperty2
+    });
+    Object.defineProperty(this, _tidyOperation, {
+      value: _tidyOperation2
+    });
+    Object.defineProperty(this, _nonTidyOperation, {
+      value: _nonTidyOperation2
+    });
+    Object.defineProperty(this, _yValues, {
+      value: _yValues2
+    });
+    Object.defineProperty(this, _properxName, {
+      value: _properxName2
+    });
+    Object.defineProperty(this, _getUnique, {
+      value: _getUnique2
+    });
+    Object.defineProperty(this, _findDataType, {
+      value: _findDataType2
+    });
     this._data = data;
     this._xCol = _xCol;
     this._yCols = _yCols;
@@ -319,33 +330,33 @@ var Series = /*#__PURE__*/function () {
     function get() {
       var newSeries = {};
 
-      _classPrivateMethodGet(this, _findDataType, _findDataType2).call(this, this.yCols, this.valuesCol);
+      _classPrivateFieldLooseBase(this, _findDataType)[_findDataType](this.yCols, this.valuesCol);
 
       var dataResult = undefined;
 
       if (this.dataType == "non-tidy") {
-        dataResult = _classPrivateMethodGet(this, _nonTidyOperation, _nonTidyOperation2).call(this, this.xCol, this.yCols, this.transform, this.xName);
+        dataResult = _classPrivateFieldLooseBase(this, _nonTidyOperation)[_nonTidyOperation](this.xCol, this.yCols, this.transform, this.xName);
       } else {
-        dataResult = _classPrivateMethodGet(this, _tidyOperation, _tidyOperation2).call(this, this.xCol, this.yCols, this.transform, this.valuesCol, this.xName);
+        dataResult = _classPrivateFieldLooseBase(this, _tidyOperation)[_tidyOperation](this.xCol, this.yCols, this.transform, this.valuesCol, this.xName);
       } //add the series properties starting with data
 
 
-      newSeries = _classPrivateMethodGet(this, _addProperty, _addProperty2).call(this, "data", newSeries, dataResult);
+      newSeries = _classPrivateFieldLooseBase(this, _addProperty)[_addProperty]("data", newSeries, dataResult);
 
       if (this.colors) {
-        newSeries = _classPrivateMethodGet(this, _addProperty, _addProperty2).call(this, "color", newSeries, this.colors);
+        newSeries = _classPrivateFieldLooseBase(this, _addProperty)[_addProperty]("color", newSeries, this.colors);
       }
 
       if (this.zIndex) {
-        newSeries = _classPrivateMethodGet(this, _addProperty, _addProperty2).call(this, "zIndex", newSeries, this.zIndex);
+        newSeries = _classPrivateFieldLooseBase(this, _addProperty)[_addProperty]("zIndex", newSeries, this.zIndex);
       }
 
       if (this.seriesTypes) {
-        newSeries = _classPrivateMethodGet(this, _addProperty, _addProperty2).call(this, "type", newSeries, this.seriesTypes);
+        newSeries = _classPrivateFieldLooseBase(this, _addProperty)[_addProperty]("type", newSeries, this.seriesTypes);
       }
 
       if (this.yAxis) {
-        newSeries = _classPrivateMethodGet(this, _addProperty, _addProperty2).call(this, "yAxis", newSeries, this.yAxis);
+        newSeries = _classPrivateFieldLooseBase(this, _addProperty)[_addProperty]("yAxis", newSeries, this.yAxis);
       } //convert the series into a list, adding the keys as series names:
 
 
@@ -478,9 +489,9 @@ function _nonTidyOperation2(xCol, yCols, transform, xName) {
     colTotals[col] = 0;
   });
 
-  _classPrivateMethodGet(this, _properxName, _properxName2).call(this, xName);
+  _classPrivateFieldLooseBase(this, _properxName)[_properxName](xName);
 
-  var yOperator = _classPrivateMethodGet(this, _yValues, _yValues2).call(this, transform);
+  var yOperator = _classPrivateFieldLooseBase(this, _yValues)[_yValues](transform);
 
   this.data.map(function (row) {
     yCols.map(function (col) {
@@ -500,11 +511,11 @@ function _tidyOperation2(xCol, yCols, transform, valuesCol, xName) {
     this.filter(this.filters);
   }
 
-  var variableColumn = _classPrivateMethodGet(this, _getUnique, _getUnique2).call(this, yCols);
+  var variableColumn = _classPrivateFieldLooseBase(this, _getUnique)[_getUnique](yCols);
 
-  var yOperator = _classPrivateMethodGet(this, _yValues, _yValues2).call(this, transform);
+  var yOperator = _classPrivateFieldLooseBase(this, _yValues)[_yValues](transform);
 
-  _classPrivateMethodGet(this, _properxName, _properxName2).call(this, xName);
+  _classPrivateFieldLooseBase(this, _properxName)[_properxName](xName);
 
   var dataResult = {};
   var seriesData = variableColumn.map(function (v) {

@@ -1,4 +1,4 @@
 {
   "presets": ["@babel/preset-env"],
-  "plugins": [["@babel/plugin-proposal-private-methods", { "loose": false }]]
+  "plugins": [["@babel/plugin-proposal-private-methods", { "loose": true }]]
 }
