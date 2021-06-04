@@ -7,6 +7,7 @@ class Series {
    * @param {String|Array} param0.yCols
    * @param {String} param0.valuesCol
    * @param {Object} param0.colors
+   * @param {Object} param0.names
    * @param {Object} param0.zIndex
    * @param {Object} param0.seriesTypes
    * @param {Object} param0.yAxis
@@ -19,6 +20,7 @@ class Series {
     xCol,
     yCols,
     colors,
+    names,
     zIndex,
     seriesTypes,
     yAxis,
@@ -34,6 +36,7 @@ class Series {
     this._xCol = xCol;
     this._yCols = yCols;
     this._colors = colors;
+    this._names = names;
     this._zIndex = zIndex;
     this._seriesTypes = seriesTypes;
     this._yAxis = yAxis;
@@ -388,7 +391,12 @@ class Series {
     //convert the series into a list, adding the keys as series names:
     let seriesList = [];
     for (let [key, value] of Object.entries(newSeries)) {
-      value.name = key;
+      if (this._names && this._names.hasOwnProperty(key)) {
+        value.name = this._names[key];
+      } else {
+        value.name = key;
+      }
+      value.id = key;
       seriesList.push(value);
     }
     return seriesList;

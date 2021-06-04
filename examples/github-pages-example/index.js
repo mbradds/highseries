@@ -54,6 +54,7 @@ const createTidyChart = (data, filters) => {
   series.valuesCol = "Volume (Mb/d)";
   series.filters = filters;
   series.zIndex = zIndex;
+  console.log(series);
 
   let tidyChart = loadChart(series.hcSeries, "container-tidy");
   let t1 = performance.now();

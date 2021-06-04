@@ -9,35 +9,35 @@ const colors = {
   Truck: "Orange",
 };
 
-let tidySeries = new Series({
-  data: tidyData,
-  xCol: "Period",
-  yCols: "Mode of Transportation", //the unique values in this column will have their own series
-  valuesCol: "Volume (Mb/d)",
-  filters: { Product: "Propane", Origin: "Canada" },
-  colors: colors,
-});
+// let tidySeries = new Series({
+//   data: tidyData,
+//   xCol: "Period",
+//   yCols: "Mode of Transportation", //the unique values in this column will have their own series
+//   valuesCol: "Volume (Mb/d)",
+//   filters: { Product: "Propane", Origin: "Canada" },
+//   colors: colors,
+// });
 
-let forHighchartsTidy = tidySeries.hcSeries;
+// let forHighchartsTidy = tidySeries.hcSeries;
 // Generate the chart
-Highcharts.chart("tidy", {
-  // options - see https://api.highcharts.com/highcharts
-  chart: {
-    type: "line",
-    borderWidth: 1,
-  },
-  title: { text: "Canada Propane Exports (Mb/d)" },
-  yAxis: {
-    title: {
-      text: "Exports (Mb/d)",
-    },
-  },
-  xAxis: {
-    type: "datetime",
-    crosshair: true,
-  },
-  series: forHighchartsTidy,
-});
+// Highcharts.chart("tidy", {
+//   // options - see https://api.highcharts.com/highcharts
+//   chart: {
+//     type: "line",
+//     borderWidth: 1,
+//   },
+//   title: { text: "Canada Propane Exports (Mb/d)" },
+//   yAxis: {
+//     title: {
+//       text: "Exports (Mb/d)",
+//     },
+//   },
+//   xAxis: {
+//     type: "datetime",
+//     crosshair: true,
+//   },
+//   series: forHighchartsTidy,
+// });
 
 let nonTidySeries = new Series({
   data: nonTidyData,
@@ -45,9 +45,16 @@ let nonTidySeries = new Series({
   yCols: ["Marine", "Pipeline", "Railway", "Truck"], //these columns will have their own series
   filters: { Product: "Propane", Origin: "Canada" },
   colors: colors,
+  names: {
+    Marine: "Marine Series",
+    Pipeline: "Pipeline Series",
+    Railway: "Rail Series",
+    Truck: "Truck Series",
+  },
 });
 
 let forHighchartsNon = nonTidySeries.hcSeries;
+console.log(forHighchartsNon);
 // Generate the chart
 
 Highcharts.chart("nonTidy", {
@@ -75,23 +82,21 @@ nonTidySeries.update({
   transform: { conv: [159, "*"], decimals: 2 }, //multiply values by 159 to convert Mb/d to m3/d
 });
 
-console.log(nonTidySeries.hcSeries)
-
 Highcharts.chart("update", {
-    // options - see https://api.highcharts.com/highcharts
-    chart: {
-      type: "line",
-      borderWidth: 1,
+  // options - see https://api.highcharts.com/highcharts
+  chart: {
+    type: "line",
+    borderWidth: 1,
+  },
+  title: { text: "Alberta Butane Exports (m3/d)" },
+  yAxis: {
+    title: {
+      text: "Exports (m3/d)",
     },
-    title: { text: "Alberta Butane Exports (m3/d)" },
-    yAxis: {
-      title: {
-        text: "Exports (m3/d)",
-      },
-    },
-    xAxis: {
-      type: "datetime",
-      crosshair: true,
-    },
-    series: nonTidySeries.hcSeries,
-  });
+  },
+  xAxis: {
+    type: "datetime",
+    crosshair: true,
+  },
+  series: nonTidySeries.hcSeries,
+});
